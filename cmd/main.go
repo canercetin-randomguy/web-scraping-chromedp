@@ -1,26 +1,53 @@
 package main
 
 import (
+	"canercetin/pkg/backend"
 	"canercetin/pkg/credentials"
 	"canercetin/pkg/devprotocol"
+	"canercetin/pkg/sqlpkg"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/chromedp/chromedp"
+	"github.com/gocolly/colly/v2"
 	"golang.org/x/net/context"
 	"log"
-	"strings"
+	"os"
+	"time"
 )
 
 func main() {
+	go func() {
+		err := backend.StartWebPageBackend(6969)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+	// get a fresh database connection
+	dbConn := sqlpkg.SqlConn{}
+	err := dbConn.GetSQLConn("")
+	if err != nil {
+		log.Println(err)
+	}
+	go func() {
+		err = dbConn.CreateClientSchema()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+	go func() {
+		err = dbConn.CreateTableSchema()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 	fmt.Println("Welcome.")
 	fmt.Println("Do we need to login? (y/n)")
 	var login string
 	fmt.Scanln(&login)
 	// Buffer to hold the HTML
-	var res *string
+	var res string
 	// make chromedp run headless
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", false),
+		chromedp.Flag("headless", true),
 	)
 	allocCtx, cancelAllocatedCTX := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancelAllocatedCTX()
@@ -49,21 +76,78 @@ func main() {
 		fmt.Println("")
 	} else {
 		fmt.Println("Now lets see what do we have here...")
-		res = devprotocol.NavigatePageReturnHTML("https://www.kktcarabam.com/kategori/ikinci-el-araclar-ticari-araclar-minibus-midibus",
+		// assign a dummy value to res
+		// TODO: Yeet the colly lines to scraper.go
+		// TODO: Let the user input the URL and find allowed domains from the URL
+		// TODO: Create a simple UI
+		res = " "
+		_, err := devprotocol.NavigatePageReturnHTML("https://www.kktcarabam.com/kategori/ikinci-el-araclar-ticari-araclar-minibus-midibus",
 			&taskCtx,
-			res,
+			&res,
 			"body")
-		doc, err := goquery.NewDocumentFromReader(strings.NewReader(*res))
 		if err != nil {
 			fmt.Println("Uh oh.")
 			panic(err)
 		}
-		doc.Find("a").Each(func(i int, s *goquery.Selection) {
-			href, exists := s.Attr("href")
-			if exists == true {
-				fmt.Println(href)
+		c := colly.NewCollector(
+			colly.AllowedDomains("www.bursadabugun.com", "bursadabugun.com"),
+			colly.MaxDepth(2))
+		var links []string
+		var brokenLinks []string
+		// Find and visit all links
+		start := time.Now()
+		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+			exists := false
+			for _, link := range links {
+				if link == e.Attr("href") {
+					exists = true
+				}
+			}
+			if exists == false {
+				links = append(links, e.Attr("href"))
+			}
+			e.Request.Visit(e.Attr("href"))
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting -> ", r.URL)
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			if r.StatusCode == 404 {
+				brokenLinks = append(brokenLinks, r.Request.URL.String())
 			}
 		})
+
+		c.Visit("https://www.bursadabugun.com/")
+		fmt.Println("Total time taken: ", time.Since(start))
+		fmt.Println("Total links found: ", len(links))
+		// save broken links to a file
+		file, err := os.Create("brokenLinks.txt")
+		if err != nil {
+			log.Fatal("Cannot create file", err)
+		}
+		defer file.Close()
+		for _, link := range brokenLinks {
+			_, err := file.WriteString(link + "\n")
+			if err != nil {
+				log.Fatal("Cannot write to file", err)
+			}
+		}
+		/*
+			fmt.Println(*res)
+			doc, err := goquery.NewDocumentFromReader(strings.NewReader(*res))
+			if err != nil {
+				fmt.Println("Uh oh.")
+				panic(err)
+			}
+			var availableLinks []string
+			doc.Find("a").Each(func(i int, s *goquery.Selection) {
+				href, exists := s.Attr("href")
+				if exists == true {
+					availableLinks = append(availableLinks, href)
+				}
+			})
+		*/
 	}
-	cancel()
 }

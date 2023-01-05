@@ -16,12 +16,12 @@
       headers: {
         'content-type': 'application/json'
       },
-      'body': JSON.stringify({"username": usernameInput, "password": passwordInput, "email": emailInput})
+      'body': JSON.stringify({"username": usernameInput, "password": passwordInput, "email": emailInput, "formType": "signup"})
     }).then((response) => response.json())
             .then((data) => {
               console.log(data);
               if (data["status"] === "success") {
-                window.location.href = "http://localhost:6969/success";
+                window.location.href = "http://localhost:6969/yeet";
               } else {
                 window.location.href = "http://localhost:6969/exists";
               }
@@ -31,11 +31,14 @@
 <body>
 <!-- create a simple form to collect username and password, creates a json and sends it to http://localhost:6969/callback -->
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+<h1>Sign Up</h1>
+<h4>Username can be maximum 25 characters.</h4>
+<h4>Password can be maximum 16 characters.</h4>
 <form action="" onsubmit="exportToJSON()" target="dummyframe">
   <label for="username">Username</label>
-  <input type="text" id="username" name="username">
+  <input type="text" id="username" name="username" maxlength="25">
   <label for="password">Password</label>
-  <input type="password" id="password" name="password">
+  <input type="password" id="password" name="password" maxlength="16">
   <label for="email">Email</label>
   <input type="email" id="email" name="email">
   {{ $callback := .CallbackURL }}
