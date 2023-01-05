@@ -24,7 +24,7 @@ import (
 // siteLink is the link of the website
 //
 // username and password is self explanatory
-func LoginCTX(ctx *context.Context, buf []byte, username string, password string, usernameFormXPath string, passwordFormXPath string, loginButtonXPath string, siteLink string) error {
+func LoginCTX(ctx *context.Context, username string, password string, usernameFormXPath string, passwordFormXPath string, loginButtonXPath string, siteLink string) error {
 	var attemptCount = 1
 	err := chromedp.Run(*ctx,
 		chromedp.Navigate(siteLink),
@@ -44,14 +44,15 @@ func LoginCTX(ctx *context.Context, buf []byte, username string, password string
 		panic(err)
 	} else if err != nil && strings.Contains(err.Error(), "net::ERR_ABORTED") == true {
 		rand.Seed(time.Now().UnixNano())
-		waitTime := rand.Intn(10)
+		// wait between 0-3 seconds.
+		waitTime := rand.Intn(3)
 		time.Sleep(time.Second * time.Duration(waitTime))
 		attemptCount++
 		if attemptCount > 15 {
 			panic("too many attempts, yeter uLa")
 		}
 		fmt.Println("connection aborted, trying again for the ", attemptCount, " time")
-		LoginCTX(ctx, buf, username, password, usernameFormXPath, passwordFormXPath, loginButtonXPath, siteLink)
+		LoginCTX(ctx, username, password, usernameFormXPath, passwordFormXPath, loginButtonXPath, siteLink)
 	}
 	return err
 }
