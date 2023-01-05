@@ -1,17 +1,14 @@
 package backend
 
-type LoginCredentials struct {
+type SignUpFormBinding struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
-	// This can be either:
-	//
-	// Sign-up page
-	//
-	// Sign-in page
-	//
-	// Both are sending callbacks to the same endpoint, so we can use the same struct. And FormType is necessary.
-	FormType string `json:"formType"`
+}
+type SignInFormBinding struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
-var callbackURL = "http://localhost:6969/callback"
+var SignupCallbackURL = "http://localhost:6969/signup/callback"
+var SigninCallbackURL = "http://localhost:6969/signin/callback"

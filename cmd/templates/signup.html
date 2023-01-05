@@ -16,12 +16,12 @@
       headers: {
         'content-type': 'application/json'
       },
-      'body': JSON.stringify({"username": usernameInput, "password": passwordInput, "email": emailInput, "formType": "signup"})
+      'body': JSON.stringify({"username": usernameInput, "password": passwordInput, "email": emailInput})
     }).then((response) => response.json())
             .then((data) => {
               console.log(data);
               if (data["status"] === "success") {
-                window.location.href = "http://localhost:6969/yeet";
+                window.location.href = "http://localhost:6969/signin";
               } else {
                 window.location.href = "http://localhost:6969/exists";
               }

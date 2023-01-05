@@ -12,7 +12,7 @@ import (
 
 // SignupFormJSONBinding sets JSON data that has arrived from signup.html's fetch request.
 func SignupFormJSONBinding(c *gin.Context) {
-	var LoginJSON = LoginCredentials{}
+	var LoginJSON = SignUpFormBinding{}
 	// Bind the json to the user credentials struct.
 	err := c.BindJSON(&LoginJSON)
 	if err != nil {
@@ -34,7 +34,7 @@ func SignupFormJSONBinding(c *gin.Context) {
 	}
 }
 
-func hashAndSalt(pwd []byte, minCost int, userInfo LoginCredentials) error {
+func hashAndSalt(pwd []byte, minCost int, userInfo SignUpFormBinding) error {
 	// Use GenerateFromPassword to hash & salt pwd.
 	// MinCost is just an integer constant provided by the bcrypt
 	// package along with DefaultCost & MaxCost.
@@ -58,7 +58,7 @@ func SignupPage(c *gin.Context) {
 		"signup.html",
 		gin.H{
 			// This will be ponged back to server when client clicks the submit button.
-			"CallbackURL": callbackURL,
+			"CallbackURL": SignupCallbackURL,
 		},
 	)
 }
