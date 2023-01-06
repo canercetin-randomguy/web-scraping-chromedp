@@ -30,8 +30,7 @@ func StartWebPageBackend(localPort int) error {
 	// If client hits submit button, make a post request to this endpoint and this endpoint will return a json.
 	r.POST("/signin/callback", SigninFormJSONBinding)
 	// If client successfully signs in, yeet him to the home page.
-	// r.GET("/home", HomeHandler)
-	// TODO: Create a home handler.
+	r.GET("/home", HomeHandler)
 	r.HTMLRender = ginview.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/static", "./templates/static/")

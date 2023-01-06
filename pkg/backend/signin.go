@@ -53,9 +53,27 @@ func SigninFormJSONBinding(c *gin.Context) {
 			"status": "failed",
 		})
 	} else {
+		// If user is successfully logged in, set a cookie of clients username.
+		c.SetCookie("username", LoginJSON.Username, 3600, "/", "localhost", false, true)
+		// Then set an auth token cookie.
+		// get a random auth token first.
+		auth := sqlpkg.RandStringBytesMaskImprSrcSB(60)
+		// nuke the auth token to the clients username.
+		err = dbConnection.InsertAuthenticationToken(LoginJSON.Username, auth)
+		if err != nil {
+			log.Println(err)
+		}
+		if err != nil {
+			log.Println(err)
+		}
+		c.SetCookie("authtoken", auth, 3600, "/", "localhost", false, true)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "success",
 		})
+	}
+	err = dbConnection.CloseConn()
+	if err != nil {
+		log.Println(err)
 	}
 }
 

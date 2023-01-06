@@ -33,7 +33,10 @@ func (conn *SqlConn) CreateClientTable() error {
     username   VARCHAR(25) not null unique,
     password   BINARY(60)  not null,
     email      VARCHAR(60) not null unique,
-    created_at TIMESTAMP   null
+    created_at TIMESTAMP   null,
+    link_limit INT         null DEFAULT 25000,
+    package	   VARCHAR(25) null DEFAULT 'free',
+    auth_token VARCHAR(60) null
 );
 
 `)

@@ -80,6 +80,10 @@ func hashAndSalt(pwd []byte, minCost int, userInfo SignUpFormBinding) error {
 	if err != nil {
 		return err
 	}
+	err = dbConnection.DB.Close()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -24,3 +24,4 @@ var SigninCallbackURL = fmt.Sprintf("http://localhost:%d/signin/callback", Port)
 // These will be used pretty frequently.
 var SignupURL = fmt.Sprintf("http://localhost:%d/signup", Port)
 var SigninURL = fmt.Sprintf("http://localhost:%d/signin", Port)
+var HomeURL = fmt.Sprintf("http://localhost:%d/home", Port)
