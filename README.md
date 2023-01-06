@@ -14,9 +14,9 @@ and then head to the localhost:7171. Port can be changed in line 19 main.go.
 ## TODO
 No order. Do whatever is easiest. Start from logging tbh.
 
-1- Integrate the broken link finder with the website.
+~~1- Integrate the broken link finder with the website.~~
 
-2- After integrating, let users download .xlsx, .csv, .txt of the results, etc. This is probably hardest part.
+2- After integrating, let users download .xlsx, .csv, .txt of the results, etc. This is probably hardest part. Yeah this is hardest part. UUUUUUUUUUUURGH.
 
 2.5 - Make a small dashboard for the results, slap a refresh button. Go-app may be used for WASM, 
 but it would make things far, far more and unnecessarily complicated. So just refresh the page whatever,
