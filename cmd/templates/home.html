@@ -10,12 +10,13 @@
         const postRequestURL = document.getElementById("callback").value;
         const linkLimit = document.getElementById("linkLimit").value;
         const link = document.getElementById("link").value;
+        const maxDepth = document.getElementById("maxDepth").value;
         fetch(postRequestURL, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
             },
-            'body': JSON.stringify({"username": username, "linkLimit": linkLimit, "mainLink": link})
+            'body': JSON.stringify({"username": username, "linkLimit": linkLimit, "mainLink": link, "maxDepth": maxDepth})
         }).then((response) => response.json())
             .then((data) => {
                 console.log(data);
@@ -38,6 +39,7 @@
     <h4>Leave a link below to search for broken links.</h4>
     <form method="post" action="" onsubmit="exportToJSON()" target="dummyframe">
         <label for="link"></label><input type="text" id="link" name="l" placeholder="Link" required="required"/>
+        <label for="maxDepth"></label><input type="text" id="maxDepth" name="md" placeholder="Max Depth" required="required"/>
         <input type="hidden" id="username" value="{{ $username }}">
         <input type="hidden" id="callback" value="{{ $callback }}">
         <input type="hidden" id="linkLimit" value="{{ $limit }}">

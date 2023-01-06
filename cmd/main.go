@@ -9,13 +9,6 @@ import (
 )
 
 func main() {
-	go func() {
-		// change backend.Port to your liking.
-		err := backend.StartWebPageBackend(backend.Port)
-		if err != nil {
-			log.Println(err)
-		}
-	}()
 	dbLogFile := logger.CreateNewFile("./logs/db")
 	dbLogger, err := logger.NewLoggerWithFile(dbLogFile)
 	if err != nil {
@@ -37,4 +30,8 @@ func main() {
 			dbLogger.Errorw("Error creating client table.", zap.Error(err))
 		}
 	}()
+	err = backend.StartWebPageBackend(backend.Port)
+	if err != nil {
+		log.Println(err)
+	}
 }

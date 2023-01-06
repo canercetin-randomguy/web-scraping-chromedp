@@ -13,8 +13,9 @@ type SignInFormBinding struct {
 }
 type ScrapingFormBinding struct {
 	Username  string `json:"username"`
-	LinkLimit string `json:"linklimit"`
-	MainLink  string `json:"mainlink"`
+	LinkLimit string `json:"linkLimit"`
+	MainLink  string `json:"mainLink"`
+	MaxDepth  string `json:"maxDepth"`
 }
 
 // !!!! Only change this if you want to change the Port. !!!!!

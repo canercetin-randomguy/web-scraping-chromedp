@@ -1,9 +1,11 @@
 package backend
 
 import (
+	"canercetin/pkg/links"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -20,18 +22,32 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			c.Status(http.StatusForbidden)
 			return
 		}
-		var LoginJSON = ScrapingFormBinding{}
+		var ScrapingJSON = ScrapingFormBinding{}
 		// Bind the json to the scraping struct.
-		err := c.BindJSON(&LoginJSON)
+		err := c.BindJSON(&ScrapingJSON)
 		if err != nil {
 			loggingUtil.Errorw("Error while binding JSON to struct.", zap.Error(err),
-				"utility", "ScrapingFormJSONBinding")
+				"utility", "ScrapingFormJSONBinding",
+				"client", ScrapingJSON.Username)
 		}
-		// TODO: Do the scraping.
+		maxDepthInteger, err := strconv.Atoi(ScrapingJSON.MaxDepth)
+		if err != nil {
+			loggingUtil.Errorw("Error while converting max depth to integer.", zap.Error(err),
+				"utility", "ScrapingFormJSONBinding",
+				"client", ScrapingJSON.Username)
+		}
+		linkLimitInteger, err := strconv.Atoi(ScrapingJSON.LinkLimit)
+		if err != nil {
+			loggingUtil.Errorw("Error while converting max depth to integer.", zap.Error(err),
+				"utility", "ScrapingFormJSONBinding",
+				"client", ScrapingJSON.Username)
+		}
+		totalLinks, brokenLinks := links.FindLinks(ScrapingJSON.MainLink, maxDepthInteger, ScrapingJSON.Username, linkLimitInteger)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 			// send the json back
-			"json": LoginJSON,
+			"json":        totalLinks,
+			"brokenLinks": brokenLinks,
 		})
 	}
 }

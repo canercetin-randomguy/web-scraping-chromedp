@@ -2,6 +2,7 @@ package links
 
 import (
 	"canercetin/pkg/logger"
+	"fmt"
 	"github.com/gocolly/colly/v2"
 	"log"
 	"net/url"
@@ -25,7 +26,7 @@ func IsUrl(str string) bool {
 // At the end of the process, returns links and broken links in order.
 //
 // If one of them is empty, it means that something went wrong.
-func FindLinks(siteLink string, maxDepth int, username string) ([]string, []string) {
+func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) ([]string, []string) {
 	// make a seperate links and brokenLinks slice, self explanatory.
 	var links []string
 	var brokenLinks []string
@@ -64,17 +65,12 @@ func FindLinks(siteLink string, maxDepth int, username string) ([]string, []stri
 			if exists == false {
 				links = append(links, e.Attr("href"))
 			}
-			err = e.Request.Visit(e.Attr("href"))
-			if err != nil {
-				return
-			}
-		} else {
-			// do nothing, because it's not a valid url.
 		}
+		c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
 	})
 	// Log when we request something, I mean, come on we have 20 GB space in cloud.
 	c.OnRequest(func(r *colly.Request) {
-		collectorLogger.Infow("Visiting",
+		collectorLogger.Infow(fmt.Sprintf("Visiting %s", r.URL.String()),
 			"url", r.URL.String(),
 			"client", username,
 			"fileNumber", fileNumber)
