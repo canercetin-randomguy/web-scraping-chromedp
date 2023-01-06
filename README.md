@@ -24,8 +24,10 @@ I am not a frontend dude.
 
 2.75 - dont use js
 
-3- Make a logger package, too many errors fiddling around. Make a new folder under cmd called logs and 
-drop everyting there. Zap may be used, check this out. https://github.com/uber-go/zap/issues/294#issuecomment-280064854
+~~3- Make a logger package, too many errors fiddling around. Make a new folder under cmd called logs and 
+drop everyting there. Zap may be used, check this out. https://github.com/uber-go/zap/issues/294#issuecomment-280064854~~
+
+3.25- Just dont forget to log.
 
 4- Make more website pages, such as upgrade, login, register, etc.
 
@@ -38,3 +40,5 @@ user credentials.Then make a POST endpoint for submitting a request.Then make a 
 
 8- For the love of god, fix JSONs, let the sign-up, or any page return sensible JSONs. Do this especially if you
 want to do Step 7. Currently only something like {status:failure} is returned, I can do better than that.
+
+9- Write unit tests for database functions with some sort of mock library. 
