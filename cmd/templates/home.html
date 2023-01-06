@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candan A.Ş</title>
+</head>
+<script>
+    function exportToJSON() {
+        const usernameInput = document.getElementById("siteLink").value;
+        const postRequestURL = document.getElementById("callback").value;
+        const linkLimit = document.getElementById("linkLimit").value;
+        fetch(postRequestURL, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            'body': JSON.stringify({"username": usernameInput, "password": passwordInput})
+        }).then((response) => response.json())
+            .then((data) => {
+                // TODO: Handle the response
+            });
+    }
+</script>
+
+<body>
+{{ $callback := .CallbackURL }}
+{{ $limit := .LinkLimit }}
+<div style="text-align: center;">
+    <h2>Welcome {{ .Username }} to Damacansu Broken Link Finder!</h2>
+    <h4>You are currently on {{ .Plan }} plan.</h4>
+    <!-- Leave a link to the upgrade page that is button -->
+    <a href="/upgrade" class="btn btn-primary">Upgrade</a>
+    <h4>Number of links you can check: {{ .Limit }}</h4>
+    <h4>Leave a link below to search for broken links.</h4>
+    <form method="post" action="" onsubmit="exportToJSON()">
+        <label for="link"></label><input type="text" id="link" name="l" placeholder="Link" required="required"/>
+        <button type="submit" class="btn btn-primary btn-block btn-large">Search</button>
+        <!-- set callback, site limit, and site link  as hidden input. -->
+        <input type="hidden" id="callback" value="{{ $callback }}">
+        <input type="hidden" id="linkLimit" value="{{ $limit }}">
+    </form>
+    <h5>This site is totally proof of concept. Yes, this site looks awful, but if you are already watching me present this, you are interviewing me for backend position.</h5>
+    <h5>Or something similar.</h5>
+</div>
+<!-- take a link as input -->
+</body>
+</html>
