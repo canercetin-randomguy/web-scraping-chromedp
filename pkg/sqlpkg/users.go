@@ -82,3 +82,56 @@ func (conn *SqlConn) RetrieveAuthenticationToken(username string) (string, error
 	}
 	return auth, nil
 }
+
+func (conn *SqlConn) InsertUserPackageDetails(username string, planName string) error {
+	_, err := conn.DB.Query("UPDATE clients.client_info SET package = ? WHERE username = ?", planName, username)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (conn *SqlConn) RetrieveUserPackageDetails(username string) (string, error) {
+	var pkg string
+	results, err := conn.DB.Query("SELECT package FROM clients.client_info WHERE username = ?", username)
+	if err != nil {
+		return "", err
+	}
+	for results.Next() {
+		err = results.Scan(&pkg)
+		if err != nil {
+			return "", err
+		}
+	}
+	err = results.Close()
+	if err != nil {
+		return "", err
+	}
+	return pkg, nil
+}
+
+func (conn *SqlConn) InsertUserLinkLimit(username string, limit int) error {
+	_, err := conn.DB.Query("UPDATE clients.client_info SET link_limit = ? WHERE username = ?", limit, username)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (conn *SqlConn) RetrieveUserLinkLimit(username string) (int, error) {
+	var limit int
+	results, err := conn.DB.Query("SELECT link_limit FROM clients.client_info WHERE username = ?", username)
+	if err != nil {
+		return 0, err
+	}
+	for results.Next() {
+		err = results.Scan(&limit)
+		if err != nil {
+			return 0, err
+		}
+	}
+	err = results.Close()
+	if err != nil {
+		return 0, err
+	}
+	return limit, nil
+}
