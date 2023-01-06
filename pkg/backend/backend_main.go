@@ -35,6 +35,7 @@ func StartWebPageBackend(localPort int) error {
 	r.HTMLRender = ginview.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/static", "./templates/static/")
+
 	err := r.Run(fmt.Sprintf(":%d", localPort))
 	if err != nil {
 		return err

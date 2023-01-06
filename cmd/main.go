@@ -16,7 +16,8 @@ import (
 
 func main() {
 	go func() {
-		err := backend.StartWebPageBackend(7171)
+		// change backend.Port to your liking.
+		err := backend.StartWebPageBackend(backend.Port)
 		if err != nil {
 			log.Println(err)
 		}

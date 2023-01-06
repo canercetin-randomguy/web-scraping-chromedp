@@ -16,6 +16,8 @@ func SignInHandler(c *gin.Context) {
 		"signin.html",
 		gin.H{
 			"CallbackURL": SigninCallbackURL,
+			"SignUpURL":   SignupURL,
+			"SignInURL":   SigninURL,
 		})
 }
 

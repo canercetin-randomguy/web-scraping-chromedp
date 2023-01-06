@@ -91,6 +91,8 @@ func SignupPage(c *gin.Context) {
 		gin.H{
 			// This will be ponged back to server when client clicks the submit button.
 			"CallbackURL": SignupCallbackURL,
+			"SignUpURL":   SignupURL,
+			"SignInURL":   SigninURL,
 		},
 	)
 }

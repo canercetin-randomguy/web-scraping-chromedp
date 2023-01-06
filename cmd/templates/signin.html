@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Candan A.Ş</title>
+    <link rel="stylesheet" type="text/css" rel="noopener" href="./static/css/signin.css">
 </head>
 <script>
   function exportToJSON() {
-    const usernameInput = document.getElementById("username").value;
-    const passwordInput = document.getElementById("password").value;
+    const usernameInput = document.getElementById("usernameSignIn").value;
+    const passwordInput = document.getElementById("passwordSignIn").value;
     const postRequestURL = document.getElementById("callback").value;
-    console.log(postRequestURL);
+    const signupURL = document.getElementById("signupURL").value;
+    const signinURL = document.getElementById("signinURL").value;
     fetch(postRequestURL, {
       method: 'POST',
       headers: {
@@ -20,7 +22,10 @@
             .then((data) => {
               console.log(data);
               if (data["status"] === "success") {
-                window.location.href = "http://localhost:6969/home";
+                window.location.href = "http://localhost:7171/home";
+              } else {
+                alert("Wrong username or password");
+                window.location.href = signinURL;
               }
             });
   }
@@ -28,16 +33,23 @@
 <body>
 <!-- write a simple form to collect username and password, creates a json and sends it to http://localhost:6969/callback -->
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
-<h1>Sign In</h1>
-<form action="" onsubmit="exportToJSON()" target="dummyframe">
-    <label for="username">Username</label>
-    <input type="text" id="username" name="username">
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password">
-    {{ $callback := .CallbackURL }}
-    <!-- put the callback url in a hidden input -->
-    <input type="hidden" id="callback" value="{{ $callback }}">
-    <input type="submit" value="Submit">
-</form>
+{{ $callback := .CallbackURL }}
+{{ $signupURL := .SignupURL }}
+<a href="{{ $signupURL }}">Sign Up</a>
+{{ $signinURL := .SigninURL }}
+<div class="login">
+    <h1>Login</h1>
+    <h5>Username's minimum length must be 8, with maximum length of 25.</h5>
+    <h5>Password's minimum length must be 8, with maximum length of 16.</h5>
+    <form method="post" action="" onsubmit="exportToJSON()" target="dummyframe">
+        <input type="hidden" id="callback" value="{{ $callback }}">
+        <input type="hidden" id="signupURL" value="{{ $signupURL }}">
+        <input type="hidden" id="signinURL" value="{{ $signinURL }}">
+        <input type="text" id="usernameSignIn" name="u" placeholder="Username" required="required" minlength="8" maxlength="25"/>
+        <input type="password" id="passwordSignIn" name="p" placeholder="Password" required="required" minlength="8" maxlength="16" />
+        <button type="submit" class="btn btn-primary btn-block btn-large">Sign In</button>
+    </form>
+    <!-- use signupURL to redirect to signup page -->
+</div>
 </body>
 </html>

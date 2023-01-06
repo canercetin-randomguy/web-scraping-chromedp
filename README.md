@@ -1,6 +1,6 @@
 # Damacansu Broken Link Finder
 
-Proof of concept. You need a local database running on 127.0.0.1:3306 (you can change IP and port in
+Proof of concept. You need a local database running on 127.0.0.1:3306 (you can change IP and Port in
 sqlpkg/types.go).
 
 ## Usage

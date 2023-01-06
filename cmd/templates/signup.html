@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Candan A.Ş</title>
+  <link rel="stylesheet" type="text/css" rel="noopener" href="./static/css/signin.css">
 </head>
 <script>
   function exportToJSON() {
-    const usernameInput = document.getElementById("username").value;
-    const passwordInput = document.getElementById("password").value;
-    const emailInput = document.getElementById("email").value;
+    const usernameInput = document.getElementById("usernameSignUp").value;
+    const passwordInput = document.getElementById("passwordSignUp").value;
+    const emailInput = document.getElementById("emailSignUp").value;
     const postRequestURL = document.getElementById("callback").value;
+    const signupURL = document.getElementById("signupURL").value;
+    const signinURL = document.getElementById("signinURL").value;
     console.log(postRequestURL);
     fetch(postRequestURL, {
       method: 'POST',
@@ -20,9 +23,10 @@
     }).then((response) => response.json())
             .then((data) => {
               if (data["status"] === "success") {
-                window.location.href = "http://localhost:6969/signin";
+                window.location.href = signinURL;
               } else if (data["status"] === "failed") {
-                window.location.href = "http://localhost:6969/exists";
+                alert("Username or email already exists");
+                window.location.href = signupURL;
               }
             });
   }
@@ -30,21 +34,24 @@
 <body>
 <!-- create a simple form to collect username and password, creates a json and sends it to http://localhost:6969/callback -->
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
-<h1>Sign Up</h1>
-<h4>Username can be maximum 25 characters.</h4>
-<h4>Password can be minimum 8 passwords and maximum 16 characters.</h4>
-<form action="" onsubmit="exportToJSON()" target="dummyframe">
-  <label for="username">Username</label>
-  <input type="text" id="username" name="username" maxlength="25">
-  <label for="password">Password</label>
-  <input type="password" id="password" name="password" maxlength="16" minlength="8">
-  <label for="email">Email</label>
-  <input type="email" id="email" name="email">
-  {{ $callback := .CallbackURL }}
-  <!-- put the callback url in a hidden input -->
-  <input type="hidden" id="callback" value="{{ $callback }}">
-  <input type="submit" value="Submit">
-
-</form>
+{{ $callback := .CallbackURL }}
+{{ $signupURL := .SignupURL }}
+<a href="{{ $signupURL }}">Sign Up</a>
+{{ $signinURL := .SigninURL }}
+<div class="login">
+  <h1>Signup</h1>
+  <h5>Username's minimum length must be 8, wtih maximum length of 25.</h5>
+  <h5>Password's minimum length must be 8, with maximum length of 16.</h5>
+  <form method="post" action="" onsubmit="exportToJSON()" target="dummyframe">
+    <input type="hidden" id="callback" value="{{ $callback }}">
+    <input type="hidden" id="signupURL" value="{{ $signupURL }}">
+    <input type="hidden" id="signinURL" value="{{ $signinURL }}">
+    <label for="usernameSignUp"></label><input type="text" id="usernameSignUp" name="u" placeholder="Username" required="required" minlength="8" maxlength="25"/>
+    <label for="passwordSignUp"></label><input type="password" id="passwordSignUp" name="p" placeholder="Password" required="required" minlength="8" maxlength="16" />
+    <label for="emailSignUp"></label><input type="email" id="emailSignUp" name="e" placeholder="Email" required="required" />
+    <button type="submit" class="btn btn-primary btn-block btn-large">Sign Up</button>
+  </form>
+  <button type="submit" class="btn btn-primary btn-block btn-large">Already signed up?</button>
+</div>
 </body>
 </html>
