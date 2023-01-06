@@ -22,16 +22,16 @@ No order. Do whatever is easiest. Start from logging tbh.
 but it would make things far, far more and unnecessarily complicated. So just refresh the page whatever,
 I am not a frontend dude.
 
-2.75 - dont use js
+~~2.75 - dont use js~~ too late, there is small scripts in page HTMLs. sorry.
 
 ~~3- Make a logger package, too many errors fiddling around. Make a new folder under cmd called logs and 
 drop everyting there. Zap may be used, check this out. https://github.com/uber-go/zap/issues/294#issuecomment-280064854~~
 
-3.25- Just dont forget to log.
+~~3.25- Just dont forget to log.~~
 
-4- Make more website pages, such as upgrade, login, register, etc.
+4- Make more website pages, such as upgrade, ~~login~~, ~~register~~, etc.
 
-5- go play one more match at dota.
+~~5- go play one more match at dota.~~ this was the most mentally challenging todo.
 
 6- Slap the whole thing to Docker.
 
