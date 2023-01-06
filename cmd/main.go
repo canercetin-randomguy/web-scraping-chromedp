@@ -16,7 +16,7 @@ import (
 
 func main() {
 	go func() {
-		err := backend.StartWebPageBackend(6969)
+		err := backend.StartWebPageBackend(7171)
 		if err != nil {
 			log.Println(err)
 		}
