@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func HomeHandler(loggingUtil *zap.Logger) gin.HandlerFunc {
+func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		// Search for username in cookies.
 		user, _ := c.Cookie("username")
@@ -46,16 +46,19 @@ func HomeHandler(loggingUtil *zap.Logger) gin.HandlerFunc {
 			loggingUtil.Info(fmt.Sprintf("User %s package details couldnt be retrieved.", user), zap.Error(err))
 			return
 		}
+		// query to see link limit.
 		limitAmount, err := dbConnection.RetrieveUserLinkLimit(user)
 		if err != nil {
 			loggingUtil.Info(fmt.Sprintf("User %s package limit details couldnt be retrieved.", user), zap.Error(err))
 			return
 		}
+		// close the database connection.
 		err = dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Info("Couldn't close the database connection.", zap.Error(err))
 			return
 		}
+		// serve the html.
 		c.HTML(
 			200,
 			"home.html",

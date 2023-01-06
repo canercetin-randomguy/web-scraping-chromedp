@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/chromedp/chromedp"
 	"github.com/gocolly/colly/v2"
+	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"log"
 	"os"
@@ -37,11 +38,11 @@ func main() {
 	go func() {
 		err = dbConn.CreateClientSchema()
 		if err != nil {
-			dbLogger.Error(err.Error())
+			dbLogger.Error("Error creating client schema.", zap.Error(err))
 		}
 		err = dbConn.CreateClientTable()
 		if err != nil {
-			dbLogger.Error(err.Error())
+			dbLogger.Errorw("Error creating client table.", zap.Error(err))
 		}
 	}()
 	fmt.Println("Welcome.")

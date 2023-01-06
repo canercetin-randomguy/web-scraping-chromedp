@@ -11,6 +11,11 @@ type SignInFormBinding struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+type ScrapingFormBinding struct {
+	Username  string `json:"username"`
+	LinkLimit string `json:"linklimit"`
+	MainLink  string `json:"mainlink"`
+}
 
 // !!!! Only change this if you want to change the Port. !!!!!
 var Port = 7171
@@ -25,4 +30,4 @@ var SigninCallbackURL = fmt.Sprintf("http://localhost:%d/signin/callback", Port)
 var SignupURL = fmt.Sprintf("http://localhost:%d/signup", Port)
 var SigninURL = fmt.Sprintf("http://localhost:%d/signin", Port)
 var HomeURL = fmt.Sprintf("http://localhost:%d/home", Port)
-var ScrapingURL = fmt.Sprintf("http://localhost:%d/scraping", Port)
+var ScrapingURL = fmt.Sprintf("http://localhost:%d/home/scraping/callback", Port)

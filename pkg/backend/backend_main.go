@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/foolin/goview/supports/ginview"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -14,7 +13,7 @@ func StartWebPageBackend(localPort int) error {
 	backendLogFilepath := logger.CreateNewFile("./logs/backend")
 	loggingUtil, err2 := logger.NewLoggerWithFile(backendLogFilepath)
 	if err2 != nil {
-		log.Println(err2)
+		return err2
 	}
 	r := gin.Default()
 	// This is used for hiding printing one hundred of lines of loading static files.
@@ -38,6 +37,8 @@ func StartWebPageBackend(localPort int) error {
 	r.POST("/signin/callback", SigninFormJSONBinding(loggingUtil))
 	// If client successfully signs in, yeet him to the home page.
 	r.GET("/home", HomeHandler(loggingUtil))
+	// This will be used when client clicks submit button with a link on the home page.
+	r.POST("/home/scraping/callback", ScrapingFormJSONBinding(loggingUtil))
 	r.HTMLRender = ginview.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/static", "./templates/static/")

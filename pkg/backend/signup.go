@@ -12,12 +12,13 @@ import (
 )
 
 // SignupFormJSONBinding sets JSON data that has arrived from signup.html's fetch request.
-func SignupFormJSONBinding(loggingUtil *zap.Logger) gin.HandlerFunc {
+func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		// close the endpoint from anyone but localhost, so signup.html can send a POST request but no one else.
 		origin := c.Request.Header.Get("Origin")
 		if !strings.Contains(origin, "localhost") {
-			loggingUtil.Error("Someone tried to access the endpoint from outside of localhost.")
+			loggingUtil.Errorw("Someone tried to access the endpoint from outside of localhost.",
+				"utility", "SignupFormJSONBinding")
 			c.Status(http.StatusForbidden)
 			return
 		}

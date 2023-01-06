@@ -23,12 +23,13 @@ func SignInHandler(c *gin.Context) {
 }
 
 // SigninFormJSONBinding sets JSON data that has arrived from signin.html's fetch request.
-func SigninFormJSONBinding(loggingUtil *zap.Logger) gin.HandlerFunc {
+func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		// close the endpoint from anyone but localhost, so signin.html can send a POST request but no one else.
 		origin := c.Request.Header.Get("Origin")
 		if !strings.Contains(origin, "localhost") {
-			loggingUtil.Info("Someone tried to access the endpoint from outside localhost.")
+			loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
+				"utility", "SigninFormJSONBinding")
 			c.Status(http.StatusForbidden)
 			return
 		}
@@ -36,7 +37,8 @@ func SigninFormJSONBinding(loggingUtil *zap.Logger) gin.HandlerFunc {
 		// Bind the json to the user credentials struct.
 		err := c.BindJSON(&LoginJSON)
 		if err != nil {
-			fmt.Println(err)
+			loggingUtil.Errorw("Error while binding JSON to struct.", zap.Error(err),
+				"utility", "SigninFormJSONBinding")
 		}
 		// Hash the password and salt it with 16 min cost, this can change. Then create a new user with the LoginJSON struct.
 		// TODO: get password from username and compare the hash with plain text password.
