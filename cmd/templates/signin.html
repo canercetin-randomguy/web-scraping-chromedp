@@ -35,7 +35,6 @@
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
 {{ $callback := .CallbackURL }}
 {{ $signupURL := .SignupURL }}
-<a href="{{ $signupURL }}">Sign Up</a>
 {{ $signinURL := .SigninURL }}
 <div class="login">
     <h1>Login</h1>
@@ -49,7 +48,9 @@
         <input type="password" id="passwordSignIn" name="p" placeholder="Password" required="required" minlength="8" maxlength="16" />
         <button type="submit" class="btn btn-primary btn-block btn-large">Sign In</button>
     </form>
-    <!-- use signupURL to redirect to signup page -->
+    <form method="get" action="{{ $signupURL }}">
+        <button type="submit" class="btn btn-primary btn-block btn-large">Want to sign up?</button>
+    </form>
 </div>
 </body>
 </html>

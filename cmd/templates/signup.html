@@ -36,10 +36,9 @@
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
 {{ $callback := .CallbackURL }}
 {{ $signupURL := .SignupURL }}
-<a href="{{ $signupURL }}">Sign Up</a>
 {{ $signinURL := .SigninURL }}
 <div class="login">
-  <h1>Signup</h1>
+  <h1>Register</h1>
   <h5>Username's minimum length must be 8, wtih maximum length of 25.</h5>
   <h5>Password's minimum length must be 8, with maximum length of 16.</h5>
   <form method="post" action="" onsubmit="exportToJSON()" target="dummyframe">
@@ -51,7 +50,9 @@
     <label for="emailSignUp"></label><input type="email" id="emailSignUp" name="e" placeholder="Email" required="required" />
     <button type="submit" class="btn btn-primary btn-block btn-large">Sign Up</button>
   </form>
-  <button type="submit" class="btn btn-primary btn-block btn-large">Already signed up?</button>
+  <form method="get" action="{{ .SigninURL }}">
+    <button type="submit" class="btn btn-primary btn-block btn-large">Already registered?</button>
+  </form>
 </div>
 </body>
 </html>
