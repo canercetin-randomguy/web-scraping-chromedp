@@ -4,6 +4,7 @@ import (
 	"canercetin/pkg/backend"
 	"canercetin/pkg/credentials"
 	"canercetin/pkg/devprotocol"
+	"canercetin/pkg/logger"
 	"canercetin/pkg/sqlpkg"
 	"fmt"
 	"github.com/chromedp/chromedp"
@@ -22,20 +23,25 @@ func main() {
 			log.Println(err)
 		}
 	}()
-	// get a fresh database connection
-	dbConn := sqlpkg.SqlConn{}
-	err := dbConn.GetSQLConn("")
+	dbLogFile := logger.CreateNewFile("./logs/db")
+	dbLogger, err := logger.NewLoggerWithFile(dbLogFile)
 	if err != nil {
 		log.Println(err)
+	}
+	// get a fresh database connection
+	dbConn := sqlpkg.SqlConn{}
+	err = dbConn.GetSQLConn("")
+	if err != nil {
+		dbLogger.Error(err.Error())
 	}
 	go func() {
 		err = dbConn.CreateClientSchema()
 		if err != nil {
-			log.Println(err)
+			dbLogger.Error(err.Error())
 		}
 		err = dbConn.CreateClientTable()
 		if err != nil {
-			log.Println(err)
+			dbLogger.Error(err.Error())
 		}
 	}()
 	fmt.Println("Welcome.")

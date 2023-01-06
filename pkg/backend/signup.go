@@ -4,6 +4,7 @@ import (
 	"canercetin/pkg/sqlpkg"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strings"
@@ -11,54 +12,47 @@ import (
 )
 
 // SignupFormJSONBinding sets JSON data that has arrived from signup.html's fetch request.
-func SignupFormJSONBinding(c *gin.Context) {
-	// close the endpoint from anyone but localhost, so signup.html can send a POST request but no one else.
-	origin := c.Request.Header.Get("Origin")
-	if !strings.Contains(origin, "localhost") {
-		c.Status(http.StatusForbidden)
-		return
-	}
-	var LoginJSON = SignUpFormBinding{}
-	// Bind the json to the user credentials struct.
-	err := c.BindJSON(&LoginJSON)
-	if err != nil {
-		fmt.Println(err)
-	}
-	// if the username or password is empty, return failed json.
-	if LoginJSON.Username == "" || LoginJSON.Password == "" || LoginJSON.Email == "" {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "failed",
-		})
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	// Hash the password and salt it with 16 min cost, this can change. Then create a new user with the LoginJSON struct.
-	err = hashAndSalt([]byte(LoginJSON.Password), 16, LoginJSON)
-	if err != nil {
-		fmt.Println(err)
-		// Send a response to the client that the user already exists.
-		if strings.Contains(err.Error(), "Duplicate entry") && strings.Contains(err.Error(), "for key 'username'") {
-			c.JSON(http.StatusBadRequest, gin.H{
+func SignupFormJSONBinding(loggingUtil *zap.Logger) gin.HandlerFunc {
+	return gin.HandlerFunc(func(c *gin.Context) {
+		// close the endpoint from anyone but localhost, so signup.html can send a POST request but no one else.
+		origin := c.Request.Header.Get("Origin")
+		if !strings.Contains(origin, "localhost") {
+			loggingUtil.Error("Someone tried to access the endpoint from outside of localhost.")
+			c.Status(http.StatusForbidden)
+			return
+		}
+		var LoginJSON = SignUpFormBinding{}
+		// Bind the json to the user credentials struct.
+		err := c.BindJSON(&LoginJSON)
+		if err != nil {
+			loggingUtil.Error("Error while binding signup form json to struct", zap.Error(err))
+			return
+		}
+		// if the username or password is empty, return failed json.
+		if LoginJSON.Username == "" || LoginJSON.Password == "" || LoginJSON.Email == "" {
+			c.JSON(http.StatusOK, gin.H{
 				"status": "failed",
-				"error":  "This username already exists.",
+				"error":  "one of the fields are empty",
 			})
-		} else if strings.Contains(err.Error(), "Duplicate entry") && strings.Contains(err.Error(), "for key 'email'") {
-			c.JSON(http.StatusBadRequest, gin.H{
+			loggingUtil.Error("User tried to sign up with empty fields", zap.String("username", LoginJSON.Username))
+			c.Status(http.StatusBadRequest)
+			return
+		}
+		// Hash the password and salt it with 16 min cost, this can change. Then create a new user with the LoginJSON struct.
+		err = hashAndSalt([]byte(LoginJSON.Password), 16, LoginJSON)
+		if err != nil {
+			loggingUtil.Error(fmt.Sprintf("Error while registering user %s to database", LoginJSON.Username), zap.Error(err))
+			c.JSON(http.StatusOK, gin.H{
 				"status": "failed",
-				"error":  "This email already exists.",
+				"error":  err.Error(),
 			})
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "failed",
-				"error":  "Something went wrong. Oops.",
+			// Send a response to the client that the user has been created.
+			c.JSON(http.StatusOK, gin.H{
+				"status": "success",
 			})
 		}
-	} else {
-		// Send a response to the client that the user has been created.
-		c.JSON(http.StatusOK, gin.H{
-			"status": "success",
-		})
-	}
+	})
 }
 
 func hashAndSalt(pwd []byte, minCost int, userInfo SignUpFormBinding) error {
