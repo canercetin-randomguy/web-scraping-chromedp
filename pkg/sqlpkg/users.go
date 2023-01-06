@@ -1,8 +1,6 @@
 package sqlpkg
 
 import (
-	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -25,17 +23,15 @@ func (conn *SqlConn) GetExistingUserPassword(username string) (error, []byte) {
 	if err != nil {
 		return err, []byte("")
 	}
-	defer func(results *sql.Rows) {
-		err = results.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(results)
 	for results.Next() {
 		err = results.Scan(&password)
 		if err != nil {
 			return err, []byte("")
 		}
+	}
+	err = results.Close()
+	if err != nil {
+		return err, []byte("")
 	}
 	return nil, password
 }
