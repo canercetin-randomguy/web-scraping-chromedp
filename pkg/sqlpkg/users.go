@@ -1,6 +1,8 @@
 package sqlpkg
 
 import (
+	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -14,7 +16,26 @@ func (conn *SqlConn) CreateNewUser(username string, password []byte, email strin
 	return nil
 }
 
-func (conn *SqlConn) GetExistingUser(database string) error {
-	// results, err := conn.DB.Query("SELECT * FROM clients.client_info")
-	return nil
+func (conn *SqlConn) GetExistingUserPassword(username string) (error, []byte) {
+	var password []byte
+	results, err := conn.DB.Query(`
+	SELECT password
+	FROM clients.client_info
+	WHERE username = ?`, username)
+	if err != nil {
+		return err, []byte("")
+	}
+	defer func(results *sql.Rows) {
+		err = results.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(results)
+	for results.Next() {
+		err = results.Scan(&password)
+		if err != nil {
+			return err, []byte("")
+		}
+	}
+	return nil, password
 }

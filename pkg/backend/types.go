@@ -10,5 +10,8 @@ type SignInFormBinding struct {
 	Password string `json:"password"`
 }
 
+// These will be called when user clicks on the submit button on forms.
+//
+// Change these to your willings.
 var SignupCallbackURL = "http://localhost:6969/signup/callback"
 var SigninCallbackURL = "http://localhost:6969/signin/callback"

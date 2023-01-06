@@ -32,9 +32,7 @@ func main() {
 		if err != nil {
 			log.Println(err)
 		}
-	}()
-	go func() {
-		err = dbConn.CreateTableSchema()
+		err = dbConn.CreateClientTable()
 		if err != nil {
 			log.Println(err)
 		}

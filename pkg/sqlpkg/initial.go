@@ -6,7 +6,7 @@ import (
 )
 
 func (conn *SqlConn) CreateClientSchema() error {
-	_, err := conn.DB.Query("CREATE SCHEMA IF NOT EXISTS 'clients'")
+	_, err := conn.DB.Query("CREATE SCHEMA IF NOT EXISTS clients")
 	if err != nil {
 		return err
 	}
@@ -18,7 +18,7 @@ func (conn *SqlConn) CreateClientSchema() error {
 	// if there is 0 rows, then we didn't create it
 	rowsAffected, err := res.RowsAffected()
 	if rowsAffected == 0 {
-		return errors.New("clients schema not created")
+		return errors.New("clients schema not created, maybe because it already exists")
 	}
 	// if there is more than 0 rows, but no error, then we created it.
 	if err != nil {
@@ -27,13 +27,12 @@ func (conn *SqlConn) CreateClientSchema() error {
 	return nil
 }
 
-func (conn *SqlConn) CreateTableSchema() error {
+func (conn *SqlConn) CreateClientTable() error {
 	query, err := conn.DB.Prepare(`
-	create table clients.client_info
-(
-    username   VARCHAR(25) not null,
+	create table clients.client_info(
+    username   VARCHAR(25) not null unique,
     password   BINARY(60)  not null,
-    email      VARCHAR(60) not null,
+    email      VARCHAR(60) not null unique,
     created_at TIMESTAMP   null
 );
 
