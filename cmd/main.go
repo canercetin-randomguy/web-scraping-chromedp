@@ -29,6 +29,10 @@ func main() {
 		if err != nil {
 			dbLogger.Errorw("Error creating client table.", zap.Error(err))
 		}
+		err = dbConn.CreateClientFileTable()
+		if err != nil {
+			dbLogger.Errorw("Error creating client file table.", zap.Error(err))
+		}
 	}()
 	err = backend.StartWebPageBackend(backend.Port)
 	if err != nil {

@@ -18,7 +18,7 @@ func StartWebPageBackend(localPort int) error {
 	r := gin.Default()
 	// This is used for hiding printing one hundred of lines of loading static files.
 	// If you want to see which files are loaded you can remove this line.
-	gin.SetMode(gin.ReleaseMode)
+	// gin.SetMode(gin.ReleaseMode)
 	// Used for taking sign up.
 	r.GET("/signup", SignupPage)
 	// Used for handling sign up requests.
@@ -31,6 +31,7 @@ func StartWebPageBackend(localPort int) error {
 			gin.H{},
 		)
 	})
+	r.GET("/download", DownloadPage(loggingUtil))
 	// If client successfully signs up, yeet him to the sign-in page.
 	r.GET("/signin", SignInHandler)
 	// If client hits submit button, make a post request to this endpoint and this endpoint will return a json.
@@ -39,6 +40,11 @@ func StartWebPageBackend(localPort int) error {
 	r.GET("/home", HomeHandler(loggingUtil))
 	// This will be used when client clicks submit button with a link on the home page.
 	r.POST("/home/scraping/callback", ScrapingFormJSONBinding(loggingUtil))
+	// r.POST("/download/callback", DownloadFormJSONBinding(loggingUtil))
+	// Too many parentheses...
+	// This is used for serving static files. under ./results/static/
+	fs := http.FileServer(http.Dir("./results/staticfs"))
+	r.Handle(http.MethodGet, "/staticfs/", gin.WrapH(http.StripPrefix("/staticfs/", fs)))
 	r.HTMLRender = ginview.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/static", "./templates/static/")

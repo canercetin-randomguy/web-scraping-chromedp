@@ -120,16 +120,16 @@ func CreateNewFileError(filepath string, username string) (string, int) {
 	return LogFilepath, fileNumber
 }
 
-// CreateNewFolder is used for creating a new folder under ./logs.
+// CreateNewFolder is used for creating a new folder under specified filepath.
 //
-// Use this like, CreateNewFolder(canercetin) and it will create a folder called canercetin under ./logs.
+// Use this like, CreateNewFolder(./results/staticfs/canercetin) and it will create a folder called canercetin under ./results/staticfs
 //
 // Then use CreateNewFileCollector to create a new file under that folder, by CreateNewdFileCollector("./logs/canercetin", "canercetin")
 //
 // Or CreateNewFile("./logs/canercetin") whatever.
-func CreateNewFolder(username string) error {
-	if _, err := os.Stat("./logs/" + username); errors.Is(err, os.ErrNotExist) {
-		err = os.Mkdir("./logs/"+username, 0755)
+func CreateNewFolder(filepath string) error {
+	if _, err := os.Stat(filepath); errors.Is(err, os.ErrNotExist) {
+		err = os.Mkdir(filepath, 0755)
 		if err != nil {
 			return err
 		}

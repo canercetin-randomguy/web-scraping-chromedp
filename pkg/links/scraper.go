@@ -38,8 +38,8 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 		Link:     "example.com",
 		IsBroken: false,
 	}
-	// Create a new folder for the client if it does not exist.
-	err := logger.CreateNewFolder(username)
+	// Create a new folder for the client for logging if it does not exist.
+	err := logger.CreateNewFolder(fmt.Sprintf("./logs/%s", username))
 	if err != nil {
 		log.Println(err)
 		return "", 0

@@ -24,7 +24,7 @@ func SignInHandler(c *gin.Context) {
 
 // SigninFormJSONBinding sets JSON data that has arrived from signin.html's fetch request.
 func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
-	return gin.HandlerFunc(func(c *gin.Context) {
+	return func(c *gin.Context) {
 		// close the endpoint from anyone but localhost, so signin.html can send a POST request but no one else.
 		origin := c.Request.Header.Get("Origin")
 		if !strings.Contains(origin, "localhost") {
@@ -80,7 +80,7 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		if err != nil {
 			log.Println(err)
 		}
-	})
+	}
 }
 
 func CompareHash(pwd []byte, userInfo SignInFormBinding) error {

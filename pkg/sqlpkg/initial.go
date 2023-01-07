@@ -57,3 +57,30 @@ func (conn *SqlConn) CreateClientTable() error {
 	}
 	return nil
 }
+
+func (conn *SqlConn) CreateClientFileTable() error {
+	query, err := conn.DB.Prepare(`
+	create table clients.client_file_info(
+    username       varchar(25) not null,
+    file_extension varchar(10) null,
+    filepath       varchar(250)     not null,
+	created_at TIMESTAMP null DEFAULT CURRENT_TIMESTAMP
+);
+`)
+	if err != nil {
+		return err
+	}
+	res, err := query.Exec()
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	// if there is 0 rows, then we didn't create it
+	if rows == 0 {
+		return err
+	}
+	return err
+}

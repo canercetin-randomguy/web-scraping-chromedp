@@ -135,3 +135,18 @@ func (conn *SqlConn) RetrieveUserLinkLimit(username string) (int, error) {
 	}
 	return limit, nil
 }
+
+func (conn *SqlConn) InsertFileLink(username string, link string, created_at string, fileExtension string) error {
+	_, err := conn.DB.Query("INSERT INTO clients.client_file_info (username, file_extension,filepath,created_at) VALUES (?, ?, ?,?)", username, fileExtension, link, created_at)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (conn *SqlConn) RetrieveFileLink(username string, fileExtension string) error {
+	_, err := conn.DB.Query("SELECT filepath FROM clients.client_file_info WHERE username = ? AND file_extension = ?", username, fileExtension)
+	if err != nil {
+		return err
+	}
+	return nil
+}
