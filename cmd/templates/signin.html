@@ -21,7 +21,7 @@
     }).then((response) => response.json())
             .then((data) => {
               if (data["status"] === "success") {
-                window.location.href = "http://localhost:7171/home";
+                window.location.href = "http://localhost:7171/v1/home";
               } else {
                 alert("Wrong username or password");
                 window.location.href = signinURL;
