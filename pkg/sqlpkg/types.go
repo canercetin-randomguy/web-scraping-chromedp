@@ -16,6 +16,7 @@ type ClientFileInfo struct {
 	FileExtension string `json:"file_extension"`
 	Filepath      string `json:"filepath"`
 	CreatedAt     string `json:"created_at"`
+	MainLink      string `json:"mainlink"`
 }
 
 var RunningOnDocker = false

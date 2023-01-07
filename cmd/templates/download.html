@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candan A.Ş</title>
+</head>
+<body>
+<a href="/v1/download" class="btn btn-primary">Cant see results? Slap me till you see it.</a>
+{{range .teststruct}}
+    <h4>{{.MainLink}}</h4>
+    <h5>{{.FileExtension}}<h5>
+    <!-- make a {{.Filepath}} button that redirects to it when clicked -->
+    <a href="{{.Filepath}}">Download</a>
+    {{.CreatedAt}}
+{{end}}
+</body>
+</html>

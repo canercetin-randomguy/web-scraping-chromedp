@@ -136,22 +136,22 @@ func (conn *SqlConn) RetrieveUserLinkLimit(username string) (int, error) {
 	return limit, nil
 }
 
-func (conn *SqlConn) InsertFileLink(username string, link string, created_at string, fileExtension string) error {
-	_, err := conn.DB.Query("INSERT INTO clients.client_file_info (username, file_extension,filepath,created_at) VALUES (?, ?, ?,?)", username, fileExtension, link, created_at)
+func (conn *SqlConn) InsertFileLink(username string, link string, created_at string, fileExtension string, mainLink string) error {
+	_, err := conn.DB.Query("INSERT INTO clients.client_file_info (username, file_extension,filepath,created_at,mainlink) VALUES (?, ?, ?,?,?)", username, fileExtension, link, created_at, mainLink)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (conn *SqlConn) RetrieveFileLinks(username string, fileExtension string) ([]ClientFileInfo, error) {
-	rows, err := conn.DB.Query("SELECT username, file_extension, filepath, created_at FROM clients.client_file_info WHERE username = ? AND file_extension = ?", username, fileExtension)
+func (conn *SqlConn) RetrieveFileLinks(username string) ([]ClientFileInfo, error) {
+	rows, err := conn.DB.Query("SELECT username, file_extension, filepath, created_at,mainlink FROM clients.client_file_info WHERE username = ?", username)
 	if err != nil {
 		return nil, err
 	}
 	var files []ClientFileInfo
 	for rows.Next() {
 		var file ClientFileInfo
-		err = rows.Scan(&file.Username, &file.FileExtension, &file.Filepath, &file.CreatedAt)
+		err = rows.Scan(&file.Username, &file.FileExtension, &file.Filepath, &file.CreatedAt, &file.MainLink)
 		if err != nil {
 			return nil, err
 		}

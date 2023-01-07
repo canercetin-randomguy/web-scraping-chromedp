@@ -50,7 +50,7 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			// then delete the cookie.
 			return
 		}
-		str, err := dbConnection.RetrieveFileLinks(user, "csv")
+		str, err := dbConnection.RetrieveFileLinks(user)
 		if err != nil {
 			loggingUtil.Errorw("Could not retrieve file links from database.", zap.Error(err),
 				"client", user)

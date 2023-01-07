@@ -96,10 +96,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"csvFilepath", csvFilepath)
 			return
 		}
-		jsonAbsoluteFilepath := strings.ReplaceAll(jsonFilepath, "./results/staticfs", "")
-		csvAbsoluteFilepath := strings.ReplaceAll(csvFilepath, "./results/staticfs", "")
-		err = dbConnection.InsertFileLink(ScrapingJSON.Username, jsonAbsoluteFilepath, time.Now().Format("2006-01-02 15:04:05"), "json")
-		err = dbConnection.InsertFileLink(ScrapingJSON.Username, csvAbsoluteFilepath, time.Now().Format("2006-01-02 15:04:05"), "csv")
+		jsonAbsoluteFilepath := FileStoragePath + strings.ReplaceAll(jsonFilepath, "./results/staticfs", "")
+		csvAbsoluteFilepath := FileStoragePath + strings.ReplaceAll(csvFilepath, "./results/staticfs", "")
+		err = dbConnection.InsertFileLink(ScrapingJSON.Username, jsonAbsoluteFilepath, time.Now().Format("2006-01-02 15:04:05"), "json", ScrapingJSON.MainLink)
+		err = dbConnection.InsertFileLink(ScrapingJSON.Username, csvAbsoluteFilepath, time.Now().Format("2006-01-02 15:04:05"), "csv", ScrapingJSON.MainLink)
 
 		if err != nil {
 			loggingUtil.Errorw("Error while reading CSV file.", zap.Error(err),
