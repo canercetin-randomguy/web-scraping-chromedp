@@ -2,8 +2,10 @@ package links
 
 import (
 	"canercetin/pkg/logger"
+	"encoding/json"
 	"fmt"
 	"github.com/gocolly/colly/v2"
+	"go.uber.org/zap"
 	"log"
 	"net/url"
 	"strings"
@@ -25,19 +27,39 @@ func IsUrl(str string) bool {
 //
 // At the end of the process, returns links and broken links in order.
 //
-// If one of them is empty, it means that something went wrong.
-func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) ([]string, []string) {
+// Returns (nil,nil) on error.
+//
+// Check terminal if something went wrong while creating the logger.
+func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) string {
 	// make a seperate links and brokenLinks slice, self explanatory.
-	var links []string
-	var brokenLinks []string
+	var ScrapedLinks = make(map[string]LinkStruct)
+	var temporaryLink = LinkStruct{
+		// Just dummy values, these will be changed and appended to ScrapedLinks.LinkStorage
+		Link:     "example.com",
+		IsBroken: false,
+	}
+	// Create a new folder for the client if it does not exist.
+	err := logger.CreateNewFolder(username)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
 	// Create a new logger to store the errors
 	// fileNumber means, if we have a file called collector_canercetin_20220101_1 or collector_canercetin_20220101_0
 	// fileNumber is 1 or 0. This increases when client requests a lot of stuff.
-	collectorLogFile, fileNumber := logger.CreateNewFileCollector("./logs/collector", username)
+	collectorLogFile, fileNumber := logger.CreateNewFileCollector(fmt.Sprintf("./logs/%s/", username), username)
 	collectorLogger, err := logger.NewLoggerWithFile(collectorLogFile)
 	if err != nil {
 		log.Println(err)
-		return []string{}, []string{}
+		return ""
+	}
+
+	errorLogFile, _ := logger.CreateNewFileError(fmt.Sprintf("./logs/%s/", username), username)
+	errorLogger, err := logger.NewLoggerWithFile(errorLogFile)
+
+	if err != nil {
+		log.Println(err)
+		return ""
 	}
 	// find the absolute path of the link, such as convert http://example.com to example.com, then store it in a seperate string.
 	absoluteSiteLink := ConvertToAbsolutePath(siteLink)
@@ -55,18 +77,32 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) ([
 			// Set a flag to false
 			exists := false
 			// Wander around in already collected links
-			for _, link := range links {
+			for it := range ScrapedLinks {
 				// If the link is already in the slice, set the flag to true
-				if link == e.Attr("href") {
+				if ScrapedLinks[it].Link == e.Attr("href") {
 					exists = true
 				}
 			}
 			// If the flag is still false, append the link to the slice
 			if exists == false {
-				links = append(links, e.Attr("href"))
+				temporaryLink.Link = e.Attr("href")
+				temporaryLink.IsBroken = false
+				ScrapedLinks[e.Attr("href")] = temporaryLink
+			}
+		} else {
+			// it may be something like /computers. So we need to add the domain to it.
+		}
+		err := c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
+		if err != nil {
+			if strings.Contains(err.Error(), "already visited") {
+				// do nothing
+			} else {
+				errorLogger.Errorw("Something went wrong while visiting the link.", zap.Error(err),
+					"client", username,
+					"fileNumber", fileNumber,
+					"link", e.Attr("href"))
 			}
 		}
-		c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
 	})
 	// Log when we request something, I mean, come on we have 20 GB space in cloud.
 	c.OnRequest(func(r *colly.Request) {
@@ -78,18 +114,29 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) ([
 	// Append the broken links to the brokenLinks slice
 	c.OnResponse(func(r *colly.Response) {
 		if r.StatusCode == 404 {
-			brokenLinks = append(brokenLinks, r.Request.URL.String())
+			if entry, ok := ScrapedLinks[r.Request.URL.String()]; ok {
+				entry.IsBroken = true
+				ScrapedLinks[r.Request.URL.String()] = entry
+			}
 		}
 	})
 	// Start wandering
 	err = c.Visit(siteLink)
 	if err != nil {
-		collectorLogger.Infow("Error while visiting the site",
+		errorLogger.Infow("Error while visiting the site",
 			"error", err,
 			"website", siteLink,
 			"client", username)
 	}
-	return links, brokenLinks
+	// marshal the ScrapedLinks
+	fmt.Println(ScrapedLinks)
+	linkResponse, err := json.Marshal(ScrapedLinks)
+	if err != nil {
+		errorLogger.Errorw("Error while marshalling the links",
+			"error", err,
+			"client", username)
+	}
+	return string(linkResponse)
 }
 
 func ConvertToAbsolutePath(siteLink string) string {

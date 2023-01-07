@@ -58,16 +58,16 @@ func CreateNewFile(filepath string) string {
 
 // CreateNewFileCollector checks filepath if it exists or not, if it does not exist, creates it.
 //
-// Use it like this: CreateNewFileCollector("./logs/collector", "canercetin")
+// Use it like this: CreateNewFileCollector("./logs/canercetin", "canercetin")
 //
-// This will create a collector_canercetin_(today's date).log file.
+// This will create a collector_canercetin_(today's date).log file under the canercetin folder in the logs folder.
 //
 // Returns filepath in the end, such as ./logs/backend_20210101.log
 //
 // Only difference between this and CreateNewFile is, if file exists, we will put a number at the end of the file.
 func CreateNewFileCollector(filepath string, username string) (string, int) {
 	fileNumber := 1
-	LogFilepath := fmt.Sprintf("%s__%s_%s_%d.log", filepath, username, time.Now().Format("20060102"), 0)
+	LogFilepath := fmt.Sprintf("%s/collector_%s_%s_%d.log", filepath, username, time.Now().Format("20060102"), 0)
 	if _, err := os.Stat(LogFilepath); errors.Is(err, os.ErrNotExist) {
 		_, err = os.Create(LogFilepath)
 		if err != nil {
@@ -77,7 +77,7 @@ func CreateNewFileCollector(filepath string, username string) (string, int) {
 		for {
 			// put a number at the end of the file, such as collector_canercetin_20210101_1.log
 			// increment the number until we find a file that does not exist.
-			LogFilepath = fmt.Sprintf("%s__%s_%s_%d.log", filepath, username, time.Now().Format("20060102"), fileNumber)
+			LogFilepath = fmt.Sprintf("%s/collector_%s_%s_%d.log", filepath, username, time.Now().Format("20060102"), fileNumber)
 			if _, err = os.Stat(LogFilepath); errors.Is(err, os.ErrNotExist) {
 				_, err = os.Create(LogFilepath)
 				if err != nil {
@@ -89,4 +89,50 @@ func CreateNewFileCollector(filepath string, username string) (string, int) {
 		}
 	}
 	return LogFilepath, fileNumber
+}
+
+// CreateNewFileError is same as CreateNewFileCollector, but it creates a file called error_(today's date).log
+//
+// Seperating error logs from collector logs, it will help.
+func CreateNewFileError(filepath string, username string) (string, int) {
+	fileNumber := 1
+	LogFilepath := fmt.Sprintf("%s/error_%s_%s_%d.log", filepath, username, time.Now().Format("20060102"), 0)
+	if _, err := os.Stat(LogFilepath); errors.Is(err, os.ErrNotExist) {
+		_, err = os.Create(LogFilepath)
+		if err != nil {
+			log.Println(err)
+		}
+	} else {
+		for {
+			// put a number at the end of the file, such as collector_canercetin_20210101_1.log
+			// increment the number until we find a file that does not exist.
+			LogFilepath = fmt.Sprintf("%s/error_%s_%s_%d.log", filepath, username, time.Now().Format("20060102"), fileNumber)
+			if _, err = os.Stat(LogFilepath); errors.Is(err, os.ErrNotExist) {
+				_, err = os.Create(LogFilepath)
+				if err != nil {
+					log.Println(err)
+				}
+				break
+			}
+			fileNumber++
+		}
+	}
+	return LogFilepath, fileNumber
+}
+
+// CreateNewFolder is used for creating a new folder under ./logs.
+//
+// Use this like, CreateNewFolder(canercetin) and it will create a folder called canercetin under ./logs.
+//
+// Then use CreateNewFileCollector to create a new file under that folder, by CreateNewdFileCollector("./logs/canercetin", "canercetin")
+//
+// Or CreateNewFile("./logs/canercetin") whatever.
+func CreateNewFolder(username string) error {
+	if _, err := os.Stat("./logs/" + username); errors.Is(err, os.ErrNotExist) {
+		err = os.Mkdir("./logs/"+username, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -42,12 +42,12 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
 		}
-		totalLinks, brokenLinks := links.FindLinks(ScrapingJSON.MainLink, maxDepthInteger, ScrapingJSON.Username, linkLimitInteger)
+		linkJson := links.FindLinks(ScrapingJSON.MainLink, maxDepthInteger, ScrapingJSON.Username, linkLimitInteger)
+		// make
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 			// send the json back
-			"json":        totalLinks,
-			"brokenLinks": brokenLinks,
+			"json": linkJson,
 		})
 	}
 }
