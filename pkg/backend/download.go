@@ -13,15 +13,21 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the cookies, ensure that no one edited the cookies to access the endpoint.
 		user, _ := c.Cookie("username")
+		if user == "" {
+			c.Redirect(302, "/v1/signin")
+			return
+		}
 		dbConnection := sqlpkg.SqlConn{}
 		err := dbConnection.GetSQLConn("clients")
 		if err != nil {
 			loggingUtil.Info(fmt.Sprintf("Could not open database connection while handling user login %s.", user), zap.Error(err))
+			return
 		}
 		// then search for auth token in DB.
 		auth, err := dbConnection.RetrieveAuthenticationToken(user)
 		if err != nil {
 			loggingUtil.Info(fmt.Sprintf("User %s authentication token could not retrieved from database.", user), zap.Error(err))
+			return
 		}
 		// if auth token is not found, redirect to login page.
 		if auth == "" {
@@ -62,6 +68,11 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// IF ENDPOINT NEEDS TO BE CLOSED, DO IT ON ITS OWN HANDLER.
 		// Check the cookies to which client.
 		user, _ := c.Cookie("username")
+		if user == "" && c.Request.URL.Path != "/v1/signin" && c.Request.URL.Path != "/v1/signup" {
+			c.Status(http.StatusUnauthorized)
+			c.Redirect(http.StatusFound, "/v1/signin")
+			return
+		}
 		// check if url contains signup or signin.
 		if strings.Contains(c.Request.URL.Path, "signup") || strings.Contains(c.Request.URL.Path, "signin") {
 			// do nothing, let the user access the page.
