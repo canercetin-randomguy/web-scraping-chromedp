@@ -17,11 +17,13 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// close the endpoint from anyone but localhost, so signup.html can send a POST request but no one else.
 		origin := c.Request.Header.Get("Origin")
 		ipAddress := c.ClientIP()
-		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "127.0.0.1") {
-			loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
-				"utility", "SignupFormJSONBinding")
-			c.Status(http.StatusForbidden)
-			return
+		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "::1") {
+			if !strings.Contains(ipAddress, "127.0.0.1") {
+				loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
+					"utility", "SigninFormJSONBinding")
+				c.Status(http.StatusForbidden)
+				return
+			}
 		}
 		var LoginJSON = SignUpFormBinding{}
 		// Bind the json to the user credentials struct.

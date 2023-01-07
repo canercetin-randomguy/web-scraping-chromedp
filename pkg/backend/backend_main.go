@@ -22,6 +22,7 @@ func StartWebPageBackend(localPort int) error {
 	// Used for taking sign up.
 	r.GET("/signup", SignupPage)
 	// Used for handling sign up requests.
+	// CLOSED ENDPOINT
 	r.POST("/signup/callback", SignupFormJSONBinding(loggingUtil))
 	// If it exists.
 	r.GET("/exists", func(c *gin.Context) {
@@ -35,10 +36,12 @@ func StartWebPageBackend(localPort int) error {
 	// If client successfully signs up, yeet him to the sign-in page.
 	r.GET("/signin", SignInHandler)
 	// If client hits submit button, make a post request to this endpoint and this endpoint will return a json.
+	// CLOSED ENDPOINT
 	r.POST("/signin/callback", SigninFormJSONBinding(loggingUtil))
 	// If client successfully signs in, yeet him to the home page.
 	r.GET("/home", HomeHandler(loggingUtil))
 	// This will be used when client clicks submit button with a link on the home page.
+	// CLOSED ENDPOINT
 	r.POST("/home/scraping/callback", ScrapingFormJSONBinding(loggingUtil))
 	// r.POST("/download/callback", DownloadFormJSONBinding(loggingUtil))
 	// Too many parentheses...

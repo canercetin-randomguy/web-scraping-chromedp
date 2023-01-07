@@ -11,19 +11,58 @@ import (
 
 func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		origin := c.Request.Header.Get("Origin")
-		ipAddress := c.ClientIP()
-		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "127.0.0.1") {
+		// If the request is not coming from localhost, a client may be trying to access the endpoint to download the file.
+		// Check the cookies to which client.
+		user, _ := c.Cookie("username")
+		// see if url contains the username.
+		if !strings.Contains(c.Request.URL.String(), user) {
 			loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
 				"utility", "RestrictSysAccess")
 			c.Status(http.StatusForbidden)
 			c.Redirect(302, "/home")
 			return
 		}
+		dbConnection := sqlpkg.SqlConn{}
+		err := dbConnection.GetSQLConn("clients")
+		if err != nil {
+			loggingUtil.Info(fmt.Sprintf("Could not open database connection while handling user login %s.", user), zap.Error(err),
+				"utility", "RestrictSysAccess",
+				"client", user)
+		}
+		// then search for auth token in DB.
+		auth, err := dbConnection.RetrieveAuthenticationToken(user)
+		if err != nil {
+			loggingUtil.Info(fmt.Sprintf("User %s authentication token could not retrieved from database.", user), zap.Error(err),
+				"utility", "RestrictSysAccess",
+				"client", user)
+		}
+		// if auth token is not found, redirect to login page.
+		if auth == "" {
+			// then delete the cookie.
+			c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
+			c.SetCookie("username", "", -1, "/", "localhost", false, true)
+			loggingUtil.Info(fmt.Sprintf("User %s tried to access home page without having an auth token", user), zap.Error(err),
+				"utility", "RestrictSysAccess",
+				"client", user)
+			c.Redirect(302, "/signin")
+			return
+		}
+		// if auth token is found, check if it is valid.
+		if auth != c.GetHeader("authtoken") {
+			// then delete the cookie.
+			c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
+			c.SetCookie("username", "", -1, "/", "localhost", false, true)
+			loggingUtil.Info(fmt.Sprintf("User %s tried to access home page with an invalid auth token", user), zap.Error(err),
+				"utility", "RestrictSysAccess",
+				"client", user)
+			c.Redirect(302, "/signin")
+			return
+		}
+		// if none of the above, let the client access the endpoint.
 	}
 }
 func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
-	return gin.HandlerFunc(func(c *gin.Context) {
+	return func(c *gin.Context) {
 		// Search for username in cookies.
 		user, _ := c.Cookie("username")
 		dbConnection := sqlpkg.SqlConn{}
@@ -85,5 +124,5 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"Limit":       limitAmount,
 			},
 		)
-	})
+	}
 }

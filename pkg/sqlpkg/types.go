@@ -11,6 +11,12 @@ import (
 type SqlConn struct {
 	DB *sql.DB
 }
+type ClientFileInfo struct {
+	Username      string `json:"username"`
+	FileExtension string `json:"file_extension"`
+	Filepath      string `json:"filepath"`
+	CreatedAt     string `json:"created_at"`
+}
 
 var RunningOnDocker = false
 

@@ -143,10 +143,19 @@ func (conn *SqlConn) InsertFileLink(username string, link string, created_at str
 	}
 	return nil
 }
-func (conn *SqlConn) RetrieveFileLink(username string, fileExtension string) error {
-	_, err := conn.DB.Query("SELECT filepath FROM clients.client_file_info WHERE username = ? AND file_extension = ?", username, fileExtension)
+func (conn *SqlConn) RetrieveFileLinks(username string, fileExtension string) ([]ClientFileInfo, error) {
+	rows, err := conn.DB.Query("SELECT username, file_extension, filepath, created_at FROM clients.client_file_info WHERE username = ? AND file_extension = ?", username, fileExtension)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	var files []ClientFileInfo
+	for rows.Next() {
+		var file ClientFileInfo
+		err = rows.Scan(&file.Username, &file.FileExtension, &file.Filepath, &file.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, file)
+	}
+	return files, nil
 }
