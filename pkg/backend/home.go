@@ -14,7 +14,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		origin := c.Request.Header.Get("Origin")
 		if !strings.Contains(origin, "localhost") {
 			loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
-				"utility", "SigninFormJSONBinding")
+				"utility", "RestrictSysAccess")
 			c.Status(http.StatusForbidden)
 			c.Redirect(302, "/home")
 			return
