@@ -43,11 +43,12 @@ func StartWebPageBackend(localPort int) error {
 	// r.POST("/download/callback", DownloadFormJSONBinding(loggingUtil))
 	// Too many parentheses...
 	// This is used for serving static files. under ./results/static/
-	fs := http.FileServer(http.Dir("./results/staticfs"))
-	r.Handle(http.MethodGet, "/staticfs/", gin.WrapH(http.StripPrefix("/staticfs/", fs)))
 	r.HTMLRender = ginview.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/static", "./templates/static/")
+	fileEndpointGroup := r.Group("/public", RestrictSysAccess(loggingUtil))
+	fileEndpointGroup.StaticFS("/", http.Dir("./results/staticfs"))
+	// disallow any user except localhost to access /public endpoint.
 	loggingUtil.Info("Starting backend on port " + fmt.Sprint(localPort))
 	err := r.Run(fmt.Sprintf(":%d", localPort))
 	if err != nil {
