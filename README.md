@@ -14,24 +14,24 @@ and then head to the localhost:7171. Port can be changed in line 19 main.go.
 ## TODO
 No order. Do whatever is easiest. Start from logging tbh.
 
-1- Integrate the broken link finder with the website.
+~~1- Integrate the broken link finder with the website.~~
 
-2- After integrating, let users download .xlsx, .csv, .txt of the results, etc. This is probably hardest part.
+2- After integrating, let users download .xlsx, .csv, .txt of the results, etc. This is probably hardest part. Yeah this is hardest part. UUUUUUUUUUUURGH.
 
 2.5 - Make a small dashboard for the results, slap a refresh button. Go-app may be used for WASM, 
 but it would make things far, far more and unnecessarily complicated. So just refresh the page whatever,
 I am not a frontend dude.
 
-2.75 - dont use js
+~~2.75 - dont use js~~ too late, there is small scripts in page HTMLs. sorry.
 
 ~~3- Make a logger package, too many errors fiddling around. Make a new folder under cmd called logs and 
 drop everyting there. Zap may be used, check this out. https://github.com/uber-go/zap/issues/294#issuecomment-280064854~~
 
-3.25- Just dont forget to log.
+~~3.25- Just dont forget to log.~~
 
-4- Make more website pages, such as upgrade, login, register, etc.
+4- Make more website pages, such as upgrade, ~~login~~, ~~register~~, etc.
 
-5- go play one more match at dota.
+~~5- go play one more match at dota.~~ this was the most mentally challenging todo.
 
 6- Slap the whole thing to Docker.
 
@@ -42,3 +42,15 @@ user credentials.Then make a POST endpoint for submitting a request.Then make a 
 want to do Step 7. Currently only something like {status:failure} is returned, I can do better than that.
 
 9- Write unit tests for database functions with some sort of mock library. 
+
+10- Look out for cookies when user arrives in sign in. 
+
+11- give yourself some love
+
+12- split collector log into two, one for runtime and one for errors. runtime logs all links that is visited, and yeah it is crowded. 
+
+13- integrate link limit and prevent users to download data if their package is not enough. 
+
+14-?????? 
+
+

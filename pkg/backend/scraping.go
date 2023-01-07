@@ -38,7 +38,7 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		}
 		linkLimitInteger, err := strconv.Atoi(ScrapingJSON.LinkLimit)
 		if err != nil {
-			loggingUtil.Errorw("Error while converting max depth to integer.", zap.Error(err),
+			loggingUtil.Errorw("Error while converting link limit to integer.", zap.Error(err),
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
 		}
