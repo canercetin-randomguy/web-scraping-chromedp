@@ -2,11 +2,14 @@ package backend
 
 import (
 	"canercetin/pkg/links"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func ScraperHandler(c *gin.Context) {
@@ -42,12 +45,39 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
 		}
-		linkJson := links.FindLinks(ScrapingJSON.MainLink, maxDepthInteger, ScrapingJSON.Username, linkLimitInteger)
-		// make
+		linkJson, fileNum := links.FindLinks(ScrapingJSON.MainLink, maxDepthInteger, ScrapingJSON.Username, linkLimitInteger)
+		clientFolderpath := fmt.Sprintf("./logs/%s", ScrapingJSON.Username)
+		jsonFilepath := fmt.Sprintf("%s/result_%s_%s_%d.json", clientFolderpath, ScrapingJSON.Username, time.Now().Format("20060102"), fileNum)
+		// save the linkJson to a file
+		err = ioutil.WriteFile(jsonFilepath, []byte(linkJson), 0644)
+		if err != nil {
+			loggingUtil.Errorw("Error while writing to JSON file", zap.Error(err),
+				"utility", "ScrapingFormJSONBinding",
+				"client", ScrapingJSON.Username,
+				"jsonFilepath", jsonFilepath)
+		}
+		// Convert the saved json file to csv
+		csvFilepath := fmt.Sprintf("%s/result_%s_%s_%d.csv", clientFolderpath, ScrapingJSON.Username, time.Now().Format("20060102"), fileNum)
+		err = links.ConvertJSONToCSV(jsonFilepath, csvFilepath, loggingUtil, ScrapingJSON.Username)
+		if err != nil {
+			loggingUtil.Errorw("Error while converting JSON to file.", zap.Error(err),
+				"utility", "ScrapingFormJSONBinding",
+				"client", ScrapingJSON.Username,
+				"jsonFilepath", jsonFilepath,
+				"csvFilepath", csvFilepath)
+		}
+		data, err := ioutil.ReadFile(csvFilepath)
+		if err != nil {
+			loggingUtil.Errorw("Error while reading CSV file.", zap.Error(err),
+				"utility", "ScrapingFormJSONBinding",
+				"client", ScrapingJSON.Username,
+				"csvFilepath", csvFilepath)
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 			// send the json back
 			"json": linkJson,
+			"csv":  string(data),
 		})
 	}
 }

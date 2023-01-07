@@ -25,12 +25,12 @@ func IsUrl(str string) bool {
 //
 // canercetin parameter means that client "canercetin" initiated the request.
 //
-// At the end of the process, returns links and broken links in order.
+// At the end of the process, returns links as a json and fileNumber which represents clients file number.
 //
-// Returns (nil,nil) on error.
+// Returns ("",0) on error.
 //
 // Check terminal if something went wrong while creating the logger.
-func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) string {
+func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (string, int) {
 	// make a seperate links and brokenLinks slice, self explanatory.
 	var ScrapedLinks = make(map[string]LinkStruct)
 	var temporaryLink = LinkStruct{
@@ -42,7 +42,7 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) st
 	err := logger.CreateNewFolder(username)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return "", 0
 	}
 	// Create a new logger to store the errors
 	// fileNumber means, if we have a file called collector_canercetin_20220101_1 or collector_canercetin_20220101_0
@@ -51,16 +51,16 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) st
 	collectorLogger, err := logger.NewLoggerWithFile(collectorLogFile)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return "", 0
 	}
 
 	errorLogFile, _ := logger.CreateNewFileError(fmt.Sprintf("./logs/%s/", username), username)
 	errorLogger, err := logger.NewLoggerWithFile(errorLogFile)
-
 	if err != nil {
 		log.Println(err)
-		return ""
+		return "", 0
 	}
+
 	// find the absolute path of the link, such as convert http://example.com to example.com, then store it in a seperate string.
 	absoluteSiteLink := ConvertToAbsolutePath(siteLink)
 	absoluteAbsoluteSitelink := strings.ReplaceAll(absoluteSiteLink, "www.", "")
@@ -129,14 +129,14 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) st
 			"client", username)
 	}
 	// marshal the ScrapedLinks
-	fmt.Println(ScrapedLinks)
 	linkResponse, err := json.Marshal(ScrapedLinks)
+	// convert the json to csv
 	if err != nil {
 		errorLogger.Errorw("Error while marshalling the links",
 			"error", err,
 			"client", username)
 	}
-	return string(linkResponse)
+	return string(linkResponse), fileNumber
 }
 
 func ConvertToAbsolutePath(siteLink string) string {
