@@ -24,6 +24,7 @@ func StartWebPageBackend(localPort int) error {
 	v1.GET("/signin", SignInHandler)
 	v1.GET("/home", HomeHandler(loggingUtil))
 	v1.GET("/download", DownloadPage(loggingUtil))
+	v1.GET("/logout", LogoutHandler(loggingUtil))
 	// If client hits submit button, make a post request to this endpoint and this endpoint will return a json. T
 	v1.POST("/signin/callback", SigninFormJSONBinding(loggingUtil))
 	v1.POST("/home/scraping/callback", ScrapingFormJSONBinding(loggingUtil))

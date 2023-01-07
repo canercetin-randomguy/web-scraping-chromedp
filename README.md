@@ -16,11 +16,13 @@ No order. Do whatever is easiest. Start from logging tbh.
 
 ~~1- Integrate the broken link finder with the website.~~
 
-2- After integrating, let users download .xlsx, .csv, .txt of the results, etc. This is probably hardest part. Yeah this is hardest part. UUUUUUUUUUUURGH.
+~~2- After integrating, let users download .xlsx, .csv, .txt of the results, etc. This is probably hardest part. Yeah this is hardest part. UUUUUUUUUUUURGH.~~
 
-2.5 - Make a small dashboard for the results, slap a refresh button. Go-app may be used for WASM, 
+2.25 Do more formats, .xlsx etc.
+
+~~2.5 - Make a small dashboard for the results, slap a refresh button. Go-app may be used for WASM, 
 but it would make things far, far more and unnecessarily complicated. So just refresh the page whatever,
-I am not a frontend dude.
+I am not a frontend dude.~~ a primitive HTML page is slapped together.
 
 ~~2.75 - dont use js~~ too late, there is small scripts in page HTMLs. sorry.
 
@@ -43,9 +45,9 @@ want to do Step 7. Currently only something like {status:failure} is returned, I
 
 9- Write unit tests for database functions with some sort of mock library. 
 
-10- Look out for cookies when user arrives in sign in. 
+~~10- Look out for cookies when user arrives in sign in.~~
 
-11- give yourself some love
+~~11- give yourself some love~~, now give yourself a hug.
 
 ~~12- split collector log into two, one for runtime and one for errors. runtime logs all links that is visited, and yeah it is crowded.~~
 

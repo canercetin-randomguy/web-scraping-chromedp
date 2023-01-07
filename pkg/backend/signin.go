@@ -12,6 +12,31 @@ import (
 )
 
 func SignInHandler(c *gin.Context) {
+	auth, err := c.Cookie("authtoken")
+	user, err := c.Cookie("username")
+	if err != nil {
+		c.Redirect(http.StatusFound, SigninPath)
+		return
+	}
+	if user != "" {
+		dbConnection := sqlpkg.SqlConn{}
+		err = dbConnection.GetSQLConn("clients")
+		if err != nil {
+			log.Println(err)
+		}
+		authDB, err := dbConnection.RetrieveAuthenticationToken(user)
+		if err != nil {
+			log.Println(err)
+		}
+		err = dbConnection.CloseConn()
+		if err != nil {
+			log.Println(err)
+		}
+		if auth == authDB {
+			c.Redirect(http.StatusFound, HomePath)
+			return
+		}
+	}
 	c.HTML(
 		http.StatusOK,
 		"signin.html",
