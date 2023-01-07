@@ -42,3 +42,7 @@ user credentials.Then make a POST endpoint for submitting a request.Then make a 
 want to do Step 7. Currently only something like {status:failure} is returned, I can do better than that.
 
 9- Write unit tests for database functions with some sort of mock library. 
+
+10- Look out for cookies when user arrives in sign in. 
+
+11- give yourself some love
