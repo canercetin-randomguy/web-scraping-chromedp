@@ -32,3 +32,8 @@ var SignupURL = fmt.Sprintf("http://localhost:%d/v1/signup", Port)
 var SigninURL = fmt.Sprintf("http://localhost:%d/v1/signin", Port)
 var HomeURL = fmt.Sprintf("http://localhost:%d/v1/home", Port)
 var ScrapingURL = fmt.Sprintf("http://localhost:%d/v1/home/scraping/callback", Port)
+
+var SignupPath = "/v1/signup"
+var SigninPath = "/v1/signin"
+var HomePath = "/v1/home"
+var ScrapingPath = "/v1/home/scraping/callback"

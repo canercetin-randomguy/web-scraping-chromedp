@@ -14,7 +14,7 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// Get the cookies, ensure that no one edited the cookies to access the endpoint.
 		user, _ := c.Cookie("username")
 		if user == "" {
-			c.Redirect(302, "/v1/signin")
+			c.Redirect(302, SigninPath)
 			return
 		}
 		dbConnection := sqlpkg.SqlConn{}
@@ -34,7 +34,7 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			// then delete the cookie.
 			c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
 			c.SetCookie("username", "", -1, "/", "localhost", false, true)
-			c.Redirect(302, "/signin")
+			c.Redirect(302, SigninPath)
 			loggingUtil.Info(fmt.Sprintf("User %s tried to access home page without having an auth token", user), zap.Error(err),
 				"cookieAuthToken", auth,
 				"headerAuthToken", c.GetHeader("authtoken"))
@@ -45,7 +45,7 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		if cookie != auth { // if they don't match, redirect to login page.
 			c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
 			c.SetCookie("username", "", -1, "/", "localhost", false, true)
-			c.Redirect(302, "/signin")
+			c.Redirect(302, SigninPath)
 			loggingUtil.Info(fmt.Sprintf("User %s auth token is not matching the one with the one in database.", user), zap.Error(err))
 			// then delete the cookie.
 			return
@@ -70,7 +70,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		user, _ := c.Cookie("username")
 		if user == "" && c.Request.URL.Path != "/v1/signin" && c.Request.URL.Path != "/v1/signup" {
 			c.Status(http.StatusUnauthorized)
-			c.Redirect(http.StatusFound, "/v1/signin")
+			c.Redirect(http.StatusFound, SigninPath)
 			return
 		}
 		// check if url contains signup or signin.
@@ -84,7 +84,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
 					"utility", "RestrictSysAccess")
 				c.Status(http.StatusForbidden)
-				c.Redirect(302, "/home")
+				c.Redirect(302, HomePath)
 				return
 			}
 			dbConnection := sqlpkg.SqlConn{}
@@ -109,7 +109,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				loggingUtil.Info(fmt.Sprintf("User %s tried to access home page without having an auth token", user), zap.Error(err),
 					"utility", "RestrictSysAccess",
 					"client", user)
-				c.Redirect(302, "/signin")
+				c.Redirect(302, SigninPath)
 				return
 			}
 			// if auth token is found, check if it is valid.
@@ -122,7 +122,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 					"client", user,
 					"cookieAuthToken", auth,
 					"headerAuthToken", c.GetHeader("authtoken"))
-				c.Redirect(302, "/signin")
+				c.Redirect(302, SigninPath)
 				return
 			}
 			// see if url contains the username

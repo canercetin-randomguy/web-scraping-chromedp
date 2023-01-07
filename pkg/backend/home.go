@@ -26,7 +26,7 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			// then delete the cookie.
 			c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
 			c.SetCookie("username", "", -1, "/", "localhost", false, true)
-			c.Redirect(302, "/signin")
+			c.Redirect(302, SigninPath)
 			loggingUtil.Info(fmt.Sprintf("User %s tried to access home page without having an auth token", user), zap.Error(err))
 			return
 		}
@@ -35,7 +35,7 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		if cookie != auth { // if they don't match, redirect to login page.
 			c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
 			c.SetCookie("username", "", -1, "/", "localhost", false, true)
-			c.Redirect(302, "/signin")
+			c.Redirect(302, SigninPath)
 			loggingUtil.Info(fmt.Sprintf("User %s auth token is not matching the one with the one in database.", user), zap.Error(err))
 			// then delete the cookie.
 			return
