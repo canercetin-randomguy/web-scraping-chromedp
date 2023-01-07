@@ -16,8 +16,9 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		// close the endpoint from anyone but localhost, so signup.html can send a POST request but no one else.
 		origin := c.Request.Header.Get("Origin")
-		if !strings.Contains(origin, "localhost") {
-			loggingUtil.Errorw("Someone tried to access the endpoint from outside of localhost.",
+		ipAddress := c.ClientIP()
+		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "127.0.0.1") {
+			loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
 				"utility", "SignupFormJSONBinding")
 			c.Status(http.StatusForbidden)
 			return
