@@ -47,7 +47,7 @@ want to do Step 7. Currently only something like {status:failure} is returned, I
 
 11- give yourself some love
 
-12- split collector log into two, one for runtime and one for errors. runtime logs all links that is visited, and yeah it is crowded. 
+~~12- split collector log into two, one for runtime and one for errors. runtime logs all links that is visited, and yeah it is crowded.~~
 
 13- integrate link limit and prevent users to download data if their package is not enough. 
 
