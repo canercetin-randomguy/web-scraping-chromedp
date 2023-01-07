@@ -12,10 +12,7 @@ import (
 func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		ipAddress := strings.Split(c.Request.RemoteAddr, ":")[0]
-		fmt.Println("IP Address: ", ipAddress)
-		fmt.Println(ipAddress)
-
+		ipAddress := c.ClientIP()
 		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "127.0.0.1") {
 			loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
 				"utility", "RestrictSysAccess")
