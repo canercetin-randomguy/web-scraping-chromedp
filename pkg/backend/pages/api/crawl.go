@@ -117,9 +117,12 @@ func CrawlHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			})
 			return
 		}
+		responseToSend := CrawlAPIResponse{}
+		json.Unmarshal(responseData, &responseToSend)
 		c.JSON(http.StatusOK, gin.H{
-			"status":   "success",
-			"response": string(responseData),
+			"status":           "success",
+			"csvDownloadLink":  "https://" + c.Request.Host + responseToSend.CSVDownloadLink,
+			"jsonDownloadLink": "https://" + c.Request.Host + responseToSend.JSONDownloadLink,
 		})
 	}
 }

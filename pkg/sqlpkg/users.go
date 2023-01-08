@@ -159,7 +159,13 @@ func (conn *SqlConn) RetrieveFileLinks(username string) ([]ClientFileInfo, error
 	}
 	return files, nil
 }
-
+func (conn *SqlConn) DeleteFileLink(username string, filepath string) error {
+	_, err := conn.DB.Query("DELETE FROM clients.client_file_info WHERE username = ? AND filepath = ?", username, filepath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func (conn *SqlConn) InsertEmail(username string, email string) error {
 	_, err := conn.DB.Query("UPDATE clients.client_info SET email = ? WHERE username = ?", email, username)
 	if err != nil {

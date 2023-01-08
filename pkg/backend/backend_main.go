@@ -31,6 +31,7 @@ func StartWebPageBackend(localPort int) error {
 	v1_API := r.Group("/v1/api")
 	v1_API.POST("/auth", api.AuthHandler(loggingUtil))
 	v1_API.POST("/crawl", api.CrawlHandler(loggingUtil))
+	v1_API.POST("/delete", api.DeleteHandler(loggingUtil))
 	// disallow any user except localhost to access /public endpoint.
 	loggingUtil.Info("Starting backend on port " + fmt.Sprint(localPort))
 	err := r.Run(fmt.Sprintf(":%d", localPort))
