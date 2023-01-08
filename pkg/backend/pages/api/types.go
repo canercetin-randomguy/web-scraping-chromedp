@@ -4,7 +4,7 @@ type AuthPOSTBinding struct {
 	Username  string `json:"username" binding:"required"`
 	Password  string `json:"password" binding:"required"`
 	Email     string `json:"email"`
-	SecretKey string `json:"secret"`
+	SecretKey string `json:"secretkey"`
 }
 type CrawlPOSTBinding struct {
 	Username string `json:"username" binding:"required"`

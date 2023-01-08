@@ -91,7 +91,7 @@ func RestrictPageAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			}
 			// if auth token is found, check if it is valid.
 			authCookie, err := c.Cookie("authtoken")
-			if auth != authCookie && (strings.Contains(c.Request.URL.Path, "signin") || strings.Contains(c.Request.URL.Path, "signup")) {
+			if auth != authCookie && (!strings.Contains(c.Request.URL.Path, "signin") || !strings.Contains(c.Request.URL.Path, "signup")) {
 				// then delete the cookie.
 				c.SetCookie("authtoken", "", -1, "/", "localhost", false, true)
 				c.SetCookie("username", "", -1, "/", "localhost", false, true)

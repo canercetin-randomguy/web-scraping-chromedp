@@ -34,6 +34,7 @@ func SecretKeyFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		defer dbConnection.DB.Close()
 		auth, err := dbConnection.RetrieveAuthenticationToken(secretKeyForm.Username)
 		if auth != secretKeyForm.AuthKey {
+			loggingUtil.Errorw("Authentication key does not match", zap.Error(err))
 			c.JSON(400, gin.H{
 				"error": "Auth key is not valid",
 			})
