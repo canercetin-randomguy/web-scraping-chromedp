@@ -16,7 +16,7 @@ and then head to the localhost:7171. Port can be changed in line 19 main.go.
 localhost:7171 also carries an API router group. You need to send ``raw data`` from PostMan.
 Users must grab a secret key from website's homepage to authenticate.
 ````go
-/v1/api/auth -> POST -> {"username":"admin","password":"admin","secretkey":"topsecret"}
+/v1/api/auth -> POST -> {"username":"admin","password":"admin","email":"cartcurt@gmail.com","secretkey":"topsecret"}
 Returns an AUTH key. Necessary for other API calls.
 ````
 ```go

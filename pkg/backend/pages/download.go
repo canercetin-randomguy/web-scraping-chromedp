@@ -33,6 +33,5 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			// pass the testStruct to the template.
 			"teststruct": str,
 		})
-
 	}
 }

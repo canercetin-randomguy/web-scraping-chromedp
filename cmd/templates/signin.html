@@ -49,7 +49,7 @@
               if (data["status"] === "success") {
                   setCookie("authtoken", data["authTokenCookie"], data["authTokenCookieExpires"]);
                   setCookie("username", data["usernameCookie"], data["usernameCookieExpires"]);
-                  window.location.href = "http://localhost:7171/v1/home";
+                  window.location.href = "/v1/home";
               } else {
                 alert("Wrong username or password");
                 window.location.href = signinURL;

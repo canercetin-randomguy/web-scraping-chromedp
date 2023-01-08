@@ -26,7 +26,6 @@ func AuthHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// get a new database connection
 		dbConnection := sqlpkg.SqlConn{}
 		err = dbConnection.GetSQLConn("clients")
-		defer dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Error("Error while connecting to database.", zap.Error(err),
 				zap.String("RequestIP", c.ClientIP()),
@@ -38,6 +37,7 @@ func AuthHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			})
 			return
 		}
+		defer dbConnection.DB.Close()
 		err, dbUserpassword := dbConnection.GetExistingUserPassword(AuthBinding.Username)
 		if err != nil {
 			loggingUtil.Error("Error while getting user from database.", zap.Error(err),
@@ -98,32 +98,40 @@ func AuthHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			})
 			return
 		}
-		auth, err := dbConnection.RetrieveAuthenticationToken(AuthBinding.Username)
+		secretKey, err := dbConnection.RetrieveSecretKey(AuthBinding.Username)
 		if err != nil {
-			loggingUtil.Error("Error while retrieving authentication token from database.", zap.Error(err),
+			loggingUtil.Error("Error while retrieving secret key.", zap.Error(err),
 				zap.String("RequestIP", c.ClientIP()),
 				zap.String("RequestURI", c.Request.RequestURI),
 				zap.String("Client", AuthBinding.Username))
 			c.JSON(500, gin.H{
 				"status":  "failed",
-				"message": "Error while retrieving authentication token from database. Please contact the developer.",
+				"message": "Error while retrieving the secret key. Please make sure got a secret key from /v1/secretkey and contact the developer.",
+			})
+		}
+		if secretKey != AuthBinding.SecretKey {
+			loggingUtil.Error("Wrong secret key.", zap.Error(err),
+				zap.String("RequestIP", c.ClientIP()),
+				zap.String("RequestURI", c.Request.RequestURI),
+				zap.String("Client", AuthBinding.Username))
+			c.JSON(400, gin.H{
+				"status":  "failed",
+				"message": "Wrong secret key. Please try again.",
 			})
 			return
 		}
-		if auth == "" || auth == " " {
-			auth = sqlpkg.RandStringBytesMaskImprSrcSB(60)
-			err = dbConnection.InsertAuthenticationToken(AuthBinding.Username, auth)
-			if err != nil {
-				loggingUtil.Error("Error while inserting authentication token to database.", zap.Error(err),
-					zap.String("RequestIP", c.ClientIP()),
-					zap.String("RequestURI", c.Request.RequestURI),
-					zap.String("Client", AuthBinding.Username))
-				c.JSON(500, gin.H{
-					"status":  "failed",
-					"message": "Error while inserting authentication token to database. Please contact the developer.",
-				})
-				return
-			}
+		auth := sqlpkg.RandStringBytesMaskImprSrcSB(60)
+		err = dbConnection.InsertAuthenticationToken(AuthBinding.Username, auth)
+		if err != nil {
+			loggingUtil.Error("Error while inserting authentication token to database.", zap.Error(err),
+				zap.String("RequestIP", c.ClientIP()),
+				zap.String("RequestURI", c.Request.RequestURI),
+				zap.String("Client", AuthBinding.Username))
+			c.JSON(500, gin.H{
+				"status":  "failed",
+				"message": "Error while inserting authentication token to database. Please contact the developer.",
+			})
+			return
 		}
 		c.JSON(200, gin.H{
 			"status":   "success",

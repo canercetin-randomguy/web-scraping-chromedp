@@ -36,19 +36,6 @@ func RestrictPageAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		if strings.Contains(c.Request.URL.Path, "signup") || strings.Contains(c.Request.URL.Path, "signin") {
 			// do nothing, let the user access the page.
 		} else {
-			// If the request is not coming from localhost, a client may be trying to access the endpoint to download the file.
-			// Or they may be trying to sign up or sign in.
-			// Check if they want to download a file.
-			if strings.Contains(c.Request.URL.String(), "storage") {
-				if !strings.Contains(c.Request.URL.String(), user) {
-					loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
-						"utility", "RestrictPageAccess")
-					c.Status(http.StatusForbidden)
-					c.Redirect(302, HomePath)
-					return
-				}
-			}
-			// If yes get a database connection.
 			dbConnection := sqlpkg.SqlConn{}
 			err := dbConnection.GetSQLConn("clients")
 			defer dbConnection.DB.Close()
@@ -67,6 +54,29 @@ func RestrictPageAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 					"client", user)
 				c.Status(http.StatusInternalServerError)
 				return
+			}
+			// If the request is not coming from localhost, a client may be trying to access the endpoint to download the file.
+			// Or they may be trying to sign up or sign in.
+			// Check if they want to download a file.
+			if strings.Contains(c.Request.URL.String(), "storage") {
+				// Check if the user is the owner of the file.
+				if !strings.Contains(c.Request.URL.String(), user) {
+					loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
+						"utility", "RestrictPageAccess")
+					c.Status(http.StatusForbidden)
+					c.Redirect(302, HomePath)
+					return
+				} else {
+					authCookie := c.Request.Header.Get("Authorization")
+					if authCookie != auth {
+						loggingUtil.Infow("Someone tried to access the endpoint from outside client.",
+							"utility", "RestrictPageAccess",
+							"client", user)
+						c.Status(http.StatusForbidden)
+						c.Redirect(302, HomePath)
+						return
+					}
+				}
 			}
 			// if auth token is not found, redirect to login page, if we are not in the login or signup page.
 			if auth == "" && (strings.Contains(c.Request.URL.Path, "signin") || strings.Contains(c.Request.URL.Path, "signup")) {

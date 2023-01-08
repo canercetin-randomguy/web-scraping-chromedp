@@ -5,6 +5,31 @@
     <title>Candan A.Ş</title>
 </head>
 <script>
+    function setCookie(c_name, value, exdays) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + exdays);
+        var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+        document.cookie = c_name + "=" + c_value;
+    }
+
+    function getCookie(c_name) {
+        var i, x, y, ARRcookies = document.cookie.split(";");
+        for (i = 0; i < ARRcookies.length; i++) {
+            x = ARRcookies[i].substr(0, ARRcookies[i].indexOf("="));
+            y = ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
+            x = x.replace(/^\s+|\s+$/g, "");
+            if (x == c_name) {
+                return unescape(y);
+            }
+        }
+    }
+
+    function cssSelected() {
+        var cssSelected = $('#myList')[0].value;
+        if (cssSelected !== "select") {
+            setCookie("selectedCSS", cssSelected, 3);
+        }
+    }
     function exportToJSON() {
         const username = document.getElementById("username").value;
         const postRequestURL = document.getElementById("callback").value;
@@ -20,6 +45,11 @@
         }).then((response) => response.json())
             .then((data) => {
             });
+    }
+    function deleteCookie() {
+        setCookie("authtoken", "", -1);
+        setCookie("username", "", -1);
+        window.location.href = "/v1/home";
     }
 </script>
 
@@ -45,8 +75,9 @@
         <button type="submit" class="btn btn-primary btn-block btn-large">Search</button>
         <!-- set callback, site limit, and site link  as hidden input. -->
     </form>
+    <button onclick="deleteCookie()" class="btn btn-primary btn-block btn-large">Logout</button>
     <a href="/v1/download" class="btn btn-primary">Download Results</a>
-    <a href="/v1/logout" class="btn btn-primary">Logout</a>
+
     <a href="{{ $secretkeycallback }}" class="btn btn-primary">Generate Secret Key for API</a>
     <h5>This site is totally proof of concept. Yes, this site looks awful, but if you are already watching me present this, you are interviewing me for backend position.</h5>
     <h5>Or something similar.</h5>

@@ -36,7 +36,8 @@ func (conn *SqlConn) CreateClientTable() error {
     created_at TIMESTAMP   null,
     link_limit INT         null DEFAULT 25000,
     package	   VARCHAR(25) null DEFAULT 'free',
-    auth_token VARCHAR(60) null
+    auth_token VARCHAR(60) null,
+    secret_key VARCHAR(60) null
 );
 
 `)
