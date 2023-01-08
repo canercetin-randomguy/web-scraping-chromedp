@@ -108,6 +108,7 @@ func AuthHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"status":  "failed",
 				"message": "Error while retrieving the secret key. Please make sure got a secret key from /v1/secretkey and contact the developer.",
 			})
+			return
 		}
 		if secretKey != AuthBinding.SecretKey {
 			loggingUtil.Error("Wrong secret key.", zap.Error(err),
