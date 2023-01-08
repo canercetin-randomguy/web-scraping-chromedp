@@ -2,6 +2,7 @@ package main
 
 import (
 	"canercetin/pkg/backend"
+	"canercetin/pkg/backend/pages"
 	"canercetin/pkg/logger"
 	"canercetin/pkg/sqlpkg"
 	"go.uber.org/zap"
@@ -34,7 +35,7 @@ func main() {
 			dbLogger.Errorw("Error creating client file table.", zap.Error(err))
 		}
 	}()
-	err = backend.StartWebPageBackend(backend.Port)
+	err = backend.StartWebPageBackend(pages.Port)
 	if err != nil {
 		log.Println(err)
 	}

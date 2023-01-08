@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"canercetin/pkg/backend"
 	"canercetin/pkg/sqlpkg"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -48,7 +47,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// Is user cookie empty, and is the endpoint signin or signup?
 		if user == "" && c.Request.URL.Path != "/v1/signin" && c.Request.URL.Path != "/v1/signup" {
 			c.Status(http.StatusUnauthorized)
-			c.Redirect(http.StatusFound, backend.SigninPath)
+			c.Redirect(http.StatusFound, SigninPath)
 			return
 		}
 		// Are we in the signup or signin page?
@@ -62,7 +61,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
 					"utility", "RestrictSysAccess")
 				c.Status(http.StatusForbidden)
-				c.Redirect(302, backend.HomePath)
+				c.Redirect(302, HomePath)
 				return
 			}
 			// If yes get a database connection.
@@ -88,7 +87,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				loggingUtil.Info(fmt.Sprintf("User %s tried to access home page without having an auth token", user), zap.Error(err),
 					"utility", "RestrictSysAccess",
 					"client", user)
-				c.Redirect(302, backend.SigninPath)
+				c.Redirect(302, SigninPath)
 				return
 			}
 			// if auth token is found, check if it is valid.
@@ -101,7 +100,7 @@ func RestrictSysAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 					"client", user,
 					"cookieAuthToken", auth,
 					"headerAuthToken", c.GetHeader("authtoken"))
-				c.Redirect(302, backend.SigninPath)
+				c.Redirect(302, SigninPath)
 				return
 			}
 			// if none of the above, let the client access the endpoint.

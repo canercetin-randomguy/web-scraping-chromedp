@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"canercetin/pkg/backend"
 	"canercetin/pkg/sqlpkg"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -41,7 +40,7 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			"home.html",
 			gin.H{
 				// When users submit the form, it will be sent to /scrape as a post request. Dont forget to hide it.
-				"CallbackURL": backend.ScrapingURL,
+				"CallbackURL": ScrapingURL,
 				"Username":    user,
 				"Plan":        planName,
 				"Limit":       limitAmount,

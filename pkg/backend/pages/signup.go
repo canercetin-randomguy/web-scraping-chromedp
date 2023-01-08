@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"canercetin/pkg/backend"
 	"canercetin/pkg/sqlpkg"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -26,7 +25,7 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				return
 			}
 		}
-		var LoginJSON = backend.SignUpFormBinding{}
+		var LoginJSON = SignUpFormBinding{}
 		// Bind the json to the user credentials struct.
 		err := c.BindJSON(&LoginJSON)
 		if err != nil {
@@ -60,7 +59,7 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	})
 }
 
-func hashAndSalt(pwd []byte, minCost int, userInfo backend.SignUpFormBinding) error {
+func hashAndSalt(pwd []byte, minCost int, userInfo SignUpFormBinding) error {
 	// Use GenerateFromPassword to hash & salt pwd.
 	// MinCost is just an integer constant provided by the bcrypt
 	// package along with DefaultCost & MaxCost.
@@ -93,9 +92,9 @@ func SignupPage(c *gin.Context) {
 		"signup.html",
 		gin.H{
 			// This will be ponged back to server when client clicks the submit button.
-			"CallbackURL": backend.SignupCallbackURL,
-			"SignupURL":   backend.SignupURL,
-			"SigninURL":   backend.SigninURL,
+			"CallbackURL": SignupCallbackURL,
+			"SignupURL":   SignupURL,
+			"SigninURL":   SigninURL,
 		},
 	)
 }

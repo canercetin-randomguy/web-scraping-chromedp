@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"canercetin/pkg/backend"
 	"canercetin/pkg/links"
 	"canercetin/pkg/logger"
 	"canercetin/pkg/sqlpkg"
@@ -31,7 +30,7 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				return
 			}
 		}
-		var ScrapingJSON = backend.ScrapingFormBinding{}
+		var ScrapingJSON = ScrapingFormBinding{}
 		// Bind the json to the scraping struct.
 		err := c.BindJSON(&ScrapingJSON)
 		if err != nil {
@@ -97,8 +96,8 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"csvFilepath", csvFilepath)
 			return
 		}
-		jsonAbsoluteFilepath := backend.FileStoragePath + strings.ReplaceAll(jsonFilepath, "./results/staticfs", "")
-		csvAbsoluteFilepath := backend.FileStoragePath + strings.ReplaceAll(csvFilepath, "./results/staticfs", "")
+		jsonAbsoluteFilepath := FileStoragePath + strings.ReplaceAll(jsonFilepath, "./results/staticfs", "")
+		csvAbsoluteFilepath := FileStoragePath + strings.ReplaceAll(csvFilepath, "./results/staticfs", "")
 		err = dbConnection.InsertFileLink(ScrapingJSON.Username, jsonAbsoluteFilepath, time.Now().Format("2006-01-02 15:04:05"), "json", ScrapingJSON.MainLink)
 		err = dbConnection.InsertFileLink(ScrapingJSON.Username, csvAbsoluteFilepath, time.Now().Format("2006-01-02 15:04:05"), "csv", ScrapingJSON.MainLink)
 
