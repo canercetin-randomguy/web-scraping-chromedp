@@ -21,6 +21,7 @@ func StartWebPageLoopback(port int) error {
 	pv.POST("/signin/callback", pages.SigninFormJSONBinding(loggingUtil))
 	pv.POST("/home/scraping/callback", pages.ScrapingFormJSONBinding(loggingUtil))
 	pv.POST("/signup/callback", pages.SignupFormJSONBinding(loggingUtil))
+	pv.POST("/secretkey/callback", pages.SecretKeyFormJSONBinding(loggingUtil))
 	err := r.Run(fmt.Sprintf("127.0.0.1:%d", port))
 	if err != nil {
 		return err

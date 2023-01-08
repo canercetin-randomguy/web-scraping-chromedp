@@ -13,6 +13,7 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		user, _ := c.Cookie("username")
 		dbConnection := sqlpkg.SqlConn{}
 		err := dbConnection.GetSQLConn("clients")
+		defer dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Info(fmt.Sprintf("Could not open database connection while handling user login %s.", user), zap.Error(err))
 		}
@@ -28,8 +29,6 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Info(fmt.Sprintf("User %s package limit details couldnt be retrieved.", user), zap.Error(err))
 			return
 		}
-		// close the database connection.
-		err = dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Info("Couldn't close the database connection.", zap.Error(err))
 			return
@@ -41,6 +40,7 @@ func HomeHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			gin.H{
 				// When users submit the form, it will be sent to /scrape as a post request. Dont forget to hide it.
 				"CallbackURL": ScrapingURL,
+				"SecretURL":   SecretKeyPath,
 				"Username":    user,
 				"Plan":        planName,
 				"Limit":       limitAmount,

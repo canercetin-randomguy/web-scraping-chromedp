@@ -18,6 +18,7 @@ func main() {
 	// get a fresh database connection
 	dbConn := sqlpkg.SqlConn{}
 	err = dbConn.GetSQLConn("")
+	defer dbConn.DB.Close()
 	if err != nil {
 		dbLogger.Error(err.Error())
 	}

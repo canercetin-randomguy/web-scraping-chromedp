@@ -12,6 +12,7 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		user, _ := c.Cookie("username")
 		dbConnection := sqlpkg.SqlConn{}
 		err := dbConnection.GetSQLConn("clients")
+		defer dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Info("Could not open database connection while handling user login.", zap.Error(err),
 				"utility", "DownloadPage")

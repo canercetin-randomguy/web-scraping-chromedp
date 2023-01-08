@@ -26,6 +26,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Errorw("Error while binding JSON to struct.", zap.Error(err),
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "failed",
+				"message": "Error while binding JSON to struct, please make sure you have sent raw JSON data.",
+			})
 			return
 		}
 		maxDepthInteger, err := strconv.Atoi(ScrapingJSON.MaxDepth)
@@ -33,6 +37,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Errorw("Error while converting max depth to integer.", zap.Error(err),
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "failed",
+				"message": "Error while converting max depth to integer, please contact the developer.",
+			})
 			return
 		}
 		linkLimitInteger, err := strconv.Atoi(ScrapingJSON.LinkLimit)
@@ -40,6 +48,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Errorw("Error while converting link limit to integer.", zap.Error(err),
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "failed",
+				"message": "Error while converting link limit to integer, please contact the developer.",
+			})
 			return
 		}
 		linkJson, fileNum := links.FindLinks(ScrapingJSON.MainLink, maxDepthInteger, ScrapingJSON.Username, linkLimitInteger)
@@ -49,6 +61,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Errorw("Error while creating new folder for user.", zap.Error(err),
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "failed",
+				"message": "Error while creating new folder for user, please contact the developer.",
+			})
 			return
 		}
 		clientFolderpath := fmt.Sprintf("./results/staticfs/%s", ScrapingJSON.Username)
@@ -60,6 +76,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username,
 				"jsonFilepath", jsonFilepath)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "failed",
+				"message": "Error while writing to JSON file, please contact the developer.",
+			})
 			return
 		}
 		// Convert the saved json file to csv
@@ -71,18 +91,27 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"client", ScrapingJSON.Username,
 				"jsonFilepath", jsonFilepath,
 				"csvFilepath", csvFilepath)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "failed",
+				"message": "Error while converting JSON to file, please contact the developer.",
+			})
 			return
 		}
 
 		// Send the jsonFilepath and csvFilepath to the database.
 		dbConnection := sqlpkg.SqlConn{}
 		err = dbConnection.GetSQLConn("clients")
+		defer dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Errorw("Error  opening DB connection while sending json and csv", zap.Error(err),
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username,
 				"jsonFilepath", jsonFilepath,
 				"csvFilepath", csvFilepath)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "failed",
+				"message": "Error  opening DB connection while sending json and csv, please contact the developer.",
+			})
 			return
 		}
 		jsonAbsoluteFilepath := FileStoragePath + strings.ReplaceAll(jsonFilepath, "./results/staticfs", "")
@@ -95,6 +124,10 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"utility", "ScrapingFormJSONBinding",
 				"client", ScrapingJSON.Username,
 				"csvFilepath", csvFilepath)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "failed",
+				"message": "Error while reading CSV file, please contact the developer.",
+			})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{

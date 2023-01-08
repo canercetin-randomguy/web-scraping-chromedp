@@ -47,21 +47,15 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 	// Create a new logger to store the errors
 	// fileNumber means, if we have a file called collector_canercetin_20220101_1 or collector_canercetin_20220101_0
 	// fileNumber is 1 or 0. This increases when client requests a lot of stuff.
-	collectorLogFile, fileNumber := logger.CreateNewFileCollector(fmt.Sprintf("./logs/%s/", username), username)
-	collectorLogger, err := logger.NewLoggerWithFile(collectorLogFile)
-	if err != nil {
-		log.Println(err)
-		return "", 0
-	}
 
-	errorLogFile, _ := logger.CreateNewFileError(fmt.Sprintf("./logs/%s/", username), username)
+	errorLogFile, fileNumber := logger.CreateNewFileError(fmt.Sprintf("./logs/%s/", username), username)
 	errorLogger, err := logger.NewLoggerWithFile(errorLogFile)
 	if err != nil {
 		log.Println(err)
 		return "", 0
 	}
 
-	// find the absolute path of the link, such as convert http://example.com to example.com, then store it in a seperate string.
+	// find the absolute path of the link, such as convert www.example.com to example.com, then store it in a seperate string.
 	absoluteSiteLink := ConvertToAbsolutePath(siteLink)
 	absoluteAbsoluteSitelink := strings.ReplaceAll(absoluteSiteLink, "www.", "")
 	// So we will have a www.example.com and an example.com absolute domains to allow.
@@ -90,9 +84,30 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 				ScrapedLinks[e.Attr("href")] = temporaryLink
 			}
 		} else {
-			// it may be something like /computers. So we need to add the domain to it.
+			// add https://absolutePath to the link if it is not valid
+			tempLink := fmt.Sprintf("https://%s%s", absoluteSiteLink, e.Attr("href"))
+			if IsUrl(tempLink) {
+				// Set a flag to false
+				exists := false
+				// Wander around in already collected links
+				for it := range ScrapedLinks {
+					// If the link is already in the slice, set the flag to true
+					if ScrapedLinks[it].Link == e.Attr("href") {
+						exists = true
+					}
+				}
+				// If the flag is still false, append the link to the slice
+				if exists == false {
+					temporaryLink.Link = e.Attr("href")
+					temporaryLink.IsBroken = false
+					ScrapedLinks[e.Attr("href")] = temporaryLink
+				}
+			} else {
+				// if it is still not valid, log it.
+				errorLogger.Error("Invalid link", zap.String("link", tempLink))
+			}
 		}
-		err := c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
+		err = c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
 		if err != nil {
 			if strings.Contains(err.Error(), "already visited") {
 				// do nothing
@@ -104,18 +119,10 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 			}
 		}
 	})
-	// Log when we request something, I mean, come on we have 20 GB space in cloud.
-	c.OnRequest(func(r *colly.Request) {
-		collectorLogger.Infow(fmt.Sprintf("Visiting %s", r.URL.String()),
-			"url", r.URL.String(),
-			"client", username,
-			"fileNumber", fileNumber)
-	})
 	// Append the broken links to the brokenLinks slice
 	c.OnResponse(func(r *colly.Response) {
 		if r.StatusCode == 404 {
 			if entry, ok := ScrapedLinks[r.Request.URL.String()]; ok {
-				entry.IsBroken = true
 				ScrapedLinks[r.Request.URL.String()] = entry
 			}
 		}
@@ -136,6 +143,7 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 			"error", err,
 			"client", username)
 	}
+	fmt.Println(string(linkResponse))
 	return string(linkResponse), fileNumber
 }
 

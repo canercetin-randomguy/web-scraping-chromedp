@@ -159,3 +159,56 @@ func (conn *SqlConn) RetrieveFileLinks(username string) ([]ClientFileInfo, error
 	}
 	return files, nil
 }
+
+func (conn *SqlConn) InsertEmail(username string, email string) error {
+	_, err := conn.DB.Query("UPDATE clients.client_info SET email = ? WHERE username = ?", email, username)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (conn *SqlConn) RetrieveEmail(username string) (string, error) {
+	var email string
+	results, err := conn.DB.Query("SELECT email FROM clients.client_info WHERE username = ?", username)
+	if err != nil {
+		return "", err
+	}
+	for results.Next() {
+		err = results.Scan(&email)
+		if err != nil {
+			return "", err
+		}
+	}
+	err = results.Close()
+	if err != nil {
+		return "", err
+	}
+	return email, nil
+}
+
+func (conn *SqlConn) RetrieveSecretKey(username string) (string, error) {
+	var secretKey string
+	results, err := conn.DB.Query("SELECT secret_key FROM clients.client_info WHERE username = ?", username)
+	if err != nil {
+		return "", err
+	}
+	for results.Next() {
+		err = results.Scan(&secretKey)
+		if err != nil {
+			return "", err
+		}
+	}
+	err = results.Close()
+	if err != nil {
+		return "", err
+	}
+	return secretKey, nil
+}
+
+func (conn *SqlConn) InsertSecretKey(username string, secretKey string) error {
+	_, err := conn.DB.Query("UPDATE clients.client_info SET secret_key = ? WHERE username = ?", secretKey, username)
+	if err != nil {
+		return err
+	}
+	return nil
+}

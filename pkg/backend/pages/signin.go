@@ -10,15 +10,51 @@ import (
 	"net/http"
 )
 
-func SignInHandler(c *gin.Context) {
-	c.HTML(
-		http.StatusOK,
-		"signin.html",
-		gin.H{
-			"CallbackURL": SigninCallbackURL,
-			"SignupURL":   SignupURL,
-			"SigninURL":   SigninURL,
-		})
+func SignInHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username, err := c.Cookie("username")
+		if err != nil {
+			loggingUtil.Errorw("Error while getting username cookie", zap.Error(err),
+				"username", username)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		authCookie, err := c.Cookie("authtoken")
+		if err != nil {
+			loggingUtil.Errorw("Error while getting auth token cookie", zap.Error(err),
+				"username", username)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		dbConnection := sqlpkg.SqlConn{}
+		err = dbConnection.GetSQLConn("clients")
+		if err != nil {
+			loggingUtil.Errorw("Error while opening database connection", zap.Error(err),
+				"username", username)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		defer dbConnection.DB.Close()
+		auth, err := dbConnection.RetrieveAuthenticationToken(username)
+		if err != nil {
+			loggingUtil.Errorw("Error while retrieving authentication token", zap.Error(err),
+				"username", username)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		if authCookie != auth {
+			c.HTML(
+				http.StatusOK,
+				"signin.html",
+				gin.H{
+					"CallbackURL": SigninCallbackURL,
+					"SignupURL":   SignupURL,
+					"SigninURL":   SigninURL,
+				})
+		} else {
+			c.Redirect(http.StatusMovedPermanently, HomePath)
+		}
+	}
 }
 
 // SigninFormJSONBinding sets JSON data that has arrived from signin.html's fetch request.
@@ -33,12 +69,19 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		}
 		dbConnection := sqlpkg.SqlConn{}
 		err = dbConnection.GetSQLConn("clients")
+		defer dbConnection.DB.Close()
 		if err != nil {
 			loggingUtil.Error("Error while connecting to database.", zap.Error(err))
 		}
 		err, hashedPassword := dbConnection.GetExistingUserPassword(LoginJSON.Username)
 		if err != nil {
 			loggingUtil.Error(fmt.Sprintf("Error while getting password of the user %s", LoginJSON.Username), zap.Error(err))
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": "failed",
+				"error":  "Error while getting password of the user",
+			})
+			c.Status(http.StatusBadGateway)
+			return
 		}
 		err = CompareHash(hashedPassword, LoginJSON)
 		if err != nil {
@@ -46,6 +89,8 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			c.JSON(http.StatusOK, gin.H{
 				"status": "failed",
 			})
+			c.Status(http.StatusBadGateway)
+			return
 		} else {
 			// Then set an auth token cookie.
 			// get a random auth token first.
@@ -55,15 +100,12 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			if err != nil {
 				log.Println(err)
 			}
-			if err != nil {
-				log.Println(err)
-			}
 			c.JSON(http.StatusOK, gin.H{
 				"status":                 "success",
 				"usernameCookie":         LoginJSON.Username,
-				"usernameCookieExpires":  3600,
+				"usernameCookieExpires":  1,
 				"authTokenCookie":        auth,
-				"authTokenCookieExpires": 3600,
+				"authTokenCookieExpires": 1,
 			})
 		}
 		err = dbConnection.CloseConn()

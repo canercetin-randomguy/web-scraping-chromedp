@@ -59,6 +59,7 @@ func hashAndSalt(pwd []byte, minCost int, userInfo SignUpFormBinding) error {
 	}
 	dbConnection := sqlpkg.SqlConn{}
 	err = dbConnection.GetSQLConn("clients")
+	defer dbConnection.DB.Close()
 	if err != nil {
 		return err
 	}
