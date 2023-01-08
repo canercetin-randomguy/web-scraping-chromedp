@@ -19,17 +19,6 @@ func ScraperHandler(c *gin.Context) {
 }
 func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Dont allow anyone to access this endpoint that is not coming from localhost.
-		origin := c.Request.Header.Get("Origin")
-		ipAddress := c.ClientIP()
-		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "::1") {
-			if !strings.Contains(ipAddress, "127.0.0.1") {
-				loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
-					"utility", "SigninFormJSONBinding")
-				c.Status(http.StatusForbidden)
-				return
-			}
-		}
 		var ScrapingJSON = ScrapingFormBinding{}
 		// Bind the json to the scraping struct.
 		err := c.BindJSON(&ScrapingJSON)

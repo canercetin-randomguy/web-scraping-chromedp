@@ -19,17 +19,13 @@ func StartWebPageBackend(localPort int) error {
 	r := gin.Default()
 	r.HTMLRender = ginview.Default()
 	r.LoadHTMLGlob("templates/*.html")
-	v1 := r.Group("/v1", pages.RestrictSysAccess(loggingUtil))
+	v1 := r.Group("/v1", pages.RestrictPageAccess(loggingUtil))
 	v1.StaticFS("/storage", http.Dir("./results/staticfs"))
 	v1.GET("/signup", pages.SignupPage)
 	v1.GET("/signin", pages.SignInHandler)
 	v1.GET("/home", pages.HomeHandler(loggingUtil))
 	v1.GET("/download", pages.DownloadPage(loggingUtil))
 	v1.GET("/logout", pages.LogoutHandler(loggingUtil))
-	// If client hits submit button, make a post request to this endpoint and this endpoint will return a json. T
-	v1.POST("/signin/callback", pages.SigninFormJSONBinding(loggingUtil))
-	v1.POST("/home/scraping/callback", pages.ScrapingFormJSONBinding(loggingUtil))
-	v1.POST("/signup/callback", pages.SignupFormJSONBinding(loggingUtil))
 	v1.Static("/static", "./templates/static/")
 	// disallow any user except localhost to access /public endpoint.
 	loggingUtil.Info("Starting backend on port " + fmt.Sprint(localPort))

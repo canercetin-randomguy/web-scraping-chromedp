@@ -35,8 +35,15 @@ func main() {
 			dbLogger.Errorw("Error creating client file table.", zap.Error(err))
 		}
 	}()
-	err = backend.StartWebPageBackend(pages.Port)
+	go func() {
+		err = backend.StartWebPageBackend(pages.Port)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	// Only available for 127.0.0.1:whateverport
+	err = backend.StartWebPageLoopback(pages.LoopbackPort)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 }

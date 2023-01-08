@@ -8,16 +8,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"strings"
 )
 
 func SignInHandler(c *gin.Context) {
 	auth, err := c.Cookie("authtoken")
 	user, err := c.Cookie("username")
-	if err != nil {
-		c.Redirect(http.StatusFound, SigninPath)
-		return
-	}
 	if user != "" {
 		dbConnection := sqlpkg.SqlConn{}
 		err = dbConnection.GetSQLConn("clients")
@@ -50,17 +45,6 @@ func SignInHandler(c *gin.Context) {
 // SigninFormJSONBinding sets JSON data that has arrived from signin.html's fetch request.
 func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// close the endpoint from anyone but localhost, so signin.html can send a POST request but no one else.
-		origin := c.Request.Header.Get("Origin")
-		ipAddress := c.ClientIP()
-		fmt.Println("Origin: ", origin)
-		fmt.Println("IP Address: ", ipAddress)
-		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "::1") {
-			loggingUtil.Infow("User tried to access the endpoint from outside localhost.",
-				"utility", "SigninFormJSONBinding")
-			c.Status(http.StatusForbidden)
-			return
-		}
 		var LoginJSON = SignInFormBinding{}
 		// Bind the json to the user credentials struct.
 		err := c.BindJSON(&LoginJSON)

@@ -7,24 +7,12 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"strings"
 	"time"
 )
 
 // SignupFormJSONBinding sets JSON data that has arrived from signup.html's fetch request.
 func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
-	return gin.HandlerFunc(func(c *gin.Context) {
-		// close the endpoint from anyone but localhost, so signup.html can send a POST request but no one else.
-		origin := c.Request.Header.Get("Origin")
-		ipAddress := c.ClientIP()
-		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "::1") {
-			if !strings.Contains(ipAddress, "127.0.0.1") {
-				loggingUtil.Infow("Someone tried to access the endpoint from outside localhost.",
-					"utility", "SigninFormJSONBinding")
-				c.Status(http.StatusForbidden)
-				return
-			}
-		}
+	return func(c *gin.Context) {
 		var LoginJSON = SignUpFormBinding{}
 		// Bind the json to the user credentials struct.
 		err := c.BindJSON(&LoginJSON)
@@ -56,7 +44,7 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"status": "success",
 			})
 		}
-	})
+	}
 }
 
 func hashAndSalt(pwd []byte, minCost int, userInfo SignUpFormBinding) error {
