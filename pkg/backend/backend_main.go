@@ -26,7 +26,6 @@ func StartWebPageBackend(localPort int) error {
 	v1.GET("/home", pages.HomeHandler(loggingUtil))
 	v1.GET("/download", pages.DownloadPage(loggingUtil))
 	v1.GET("/logout", pages.LogoutHandler(loggingUtil))
-	v1.Static("/static", "./templates/static/")
 	// disallow any user except localhost to access /public endpoint.
 	loggingUtil.Info("Starting backend on port " + fmt.Sprint(localPort))
 	err := r.Run(fmt.Sprintf(":%d", localPort))

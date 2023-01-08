@@ -14,8 +14,6 @@ func RestrictCallbackAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// close the endpoint from anyone but localhost, so signin.html can send a POST request but no one else.
 		origin := c.Request.Header.Get("Origin")
 		ipAddress := c.ClientIP()
-		fmt.Println(c.ClientIP())
-		fmt.Println(c.Request.Header.Get("Origin"))
 		if !strings.Contains(origin, "localhost") || !strings.Contains(ipAddress, "127.0.0.1") {
 			loggingUtil.Infow("User tried to access the endpoint from outside localhost.",
 				"utility", "SigninFormJSONBinding")
@@ -30,7 +28,7 @@ func RestrictPageAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		// IF ENDPOINT NEEDS TO BE CLOSED, SET THAT ENDPOINT IN BACKEND_LOOPBACK.
 		// Check the cookies to which client.
 		user, _ := c.Cookie("username")
-		// Is user cookie empty, and is the endpoint signin or signup?
+		fmt.Println(user) // Is user cookie empty, and is the endpoint signin or signup?
 		if user == "" && c.Request.URL.Path != "/v1/signin" && c.Request.URL.Path != "/v1/signup" {
 			c.Status(http.StatusUnauthorized)
 			c.Redirect(http.StatusFound, SigninPath)

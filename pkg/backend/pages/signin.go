@@ -11,27 +11,6 @@ import (
 )
 
 func SignInHandler(c *gin.Context) {
-	auth, err := c.Cookie("authtoken")
-	user, err := c.Cookie("username")
-	if user != "" {
-		dbConnection := sqlpkg.SqlConn{}
-		err = dbConnection.GetSQLConn("clients")
-		if err != nil {
-			log.Println(err)
-		}
-		authDB, err := dbConnection.RetrieveAuthenticationToken(user)
-		if err != nil {
-			log.Println(err)
-		}
-		err = dbConnection.CloseConn()
-		if err != nil {
-			log.Println(err)
-		}
-		if auth == authDB {
-			c.Redirect(http.StatusFound, HomePath)
-			return
-		}
-	}
 	c.HTML(
 		http.StatusOK,
 		"signin.html",
@@ -52,8 +31,6 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Errorw("Error while binding JSON to struct.", zap.Error(err),
 				"utility", "SigninFormJSONBinding")
 		}
-		// Hash the password and salt it with 16 min cost, this can change. Then create a new user with the LoginJSON struct.
-		// TODO: get password from username and compare the hash with plain text password.
 		dbConnection := sqlpkg.SqlConn{}
 		err = dbConnection.GetSQLConn("clients")
 		if err != nil {
@@ -70,8 +47,6 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"status": "failed",
 			})
 		} else {
-			// If user is successfully logged in, set a cookie of clients username.
-			c.SetCookie("username", LoginJSON.Username, 3600, "/", "localhost", false, true)
 			// Then set an auth token cookie.
 			// get a random auth token first.
 			auth := sqlpkg.RandStringBytesMaskImprSrcSB(60)
@@ -83,9 +58,12 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			if err != nil {
 				log.Println(err)
 			}
-			c.SetCookie("authtoken", auth, 3600, "/", "localhost", false, true)
 			c.JSON(http.StatusOK, gin.H{
-				"status": "success",
+				"status":                 "success",
+				"usernameCookie":         LoginJSON.Username,
+				"usernameCookieExpires":  3600,
+				"authTokenCookie":        auth,
+				"authTokenCookieExpires": 3600,
 			})
 		}
 		err = dbConnection.CloseConn()

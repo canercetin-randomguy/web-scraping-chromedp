@@ -6,12 +6,22 @@
     <link rel="stylesheet" type="text/css" rel="noopener" href="./static/css/signin.css">
 </head>
 <script>
+    function setCookie(name,value,days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
   function exportToJSON() {
     const usernameInput = document.getElementById("usernameSignIn").value;
     const passwordInput = document.getElementById("passwordSignIn").value;
     const postRequestURL = document.getElementById("callback").value;
     const signupURL = document.getElementById("signupURL").value;
     const signinURL = document.getElementById("signinURL").value;
+
     fetch(postRequestURL, {
       method: 'POST',
       headers: {
@@ -21,6 +31,8 @@
     }).then((response) => response.json())
             .then((data) => {
               if (data["status"] === "success") {
+                  setCookie("authtoken", data["authtokenCookie"], data["authtokenCookieExpires"]);
+                  setCookie("username", data["usernameCookie"], data["usernameCookieExpires"]);
                 window.location.href = "http://localhost:7171/v1/home";
               } else {
                 alert("Wrong username or password");
