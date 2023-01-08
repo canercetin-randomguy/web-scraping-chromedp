@@ -1,6 +1,7 @@
-package backend
+package pages
 
 import (
+	"canercetin/pkg/backend"
 	"canercetin/pkg/sqlpkg"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ func SignInHandler(c *gin.Context) {
 	auth, err := c.Cookie("authtoken")
 	user, err := c.Cookie("username")
 	if err != nil {
-		c.Redirect(http.StatusFound, SigninPath)
+		c.Redirect(http.StatusFound, backend.SigninPath)
 		return
 	}
 	if user != "" {
@@ -33,7 +34,7 @@ func SignInHandler(c *gin.Context) {
 			log.Println(err)
 		}
 		if auth == authDB {
-			c.Redirect(http.StatusFound, HomePath)
+			c.Redirect(http.StatusFound, backend.HomePath)
 			return
 		}
 	}
@@ -41,9 +42,9 @@ func SignInHandler(c *gin.Context) {
 		http.StatusOK,
 		"signin.html",
 		gin.H{
-			"CallbackURL": SigninCallbackURL,
-			"SignupURL":   SignupURL,
-			"SigninURL":   SigninURL,
+			"CallbackURL": backend.SigninCallbackURL,
+			"SignupURL":   backend.SignupURL,
+			"SigninURL":   backend.SigninURL,
 		})
 }
 
@@ -61,7 +62,7 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			c.Status(http.StatusForbidden)
 			return
 		}
-		var LoginJSON = SignInFormBinding{}
+		var LoginJSON = backend.SignInFormBinding{}
 		// Bind the json to the user credentials struct.
 		err := c.BindJSON(&LoginJSON)
 		if err != nil {
@@ -111,7 +112,7 @@ func SigninFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	}
 }
 
-func CompareHash(pwd []byte, userInfo SignInFormBinding) error {
+func CompareHash(pwd []byte, userInfo backend.SignInFormBinding) error {
 	err := bcrypt.CompareHashAndPassword(pwd, []byte(userInfo.Password))
 	if err != nil {
 		return err
