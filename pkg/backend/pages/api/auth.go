@@ -9,8 +9,9 @@ import (
 
 func AuthHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// print the form-data that has arrived.
+		// take the form-data from the request
 		var AuthBinding = AuthPOSTBinding{}
+		// bind it to the AuthBinding struct
 		err := c.BindJSON(&AuthBinding)
 		if err != nil {
 			loggingUtil.Info("Could not bind json to AuthPOSTBinding struct.", zap.Error(err),

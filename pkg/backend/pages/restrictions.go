@@ -67,7 +67,15 @@ func RestrictPageAccess(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 					c.Redirect(302, HomePath)
 					return
 				} else {
-					authCookie := c.Request.Header.Get("Authorization")
+					authCookie, err := c.Cookie("authtoken")
+					if err != nil {
+						loggingUtil.Infow("User cookie cannot be retrieved.",
+							"utility", "RestrictPageAccess",
+							"client", "user")
+						c.Status(http.StatusForbidden)
+						c.Redirect(302, HomePath)
+						return
+					}
 					if authCookie != auth {
 						loggingUtil.Infow("Someone tried to access the endpoint from outside client.",
 							"utility", "RestrictPageAccess",

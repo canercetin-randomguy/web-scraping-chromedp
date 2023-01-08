@@ -131,7 +131,9 @@ func ScrapingFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
+			"status":           "ok",
+			"csvDownloadLink":  fmt.Sprintf("%s%s", FileStoragePath, strings.ReplaceAll(csvFilepath, "./results/staticfs", "")),
+			"jsonDownloadLink": fmt.Sprintf("%s%s", FileStoragePath, strings.ReplaceAll(jsonFilepath, "./results/staticfs", "")),
 		})
 	}
 }

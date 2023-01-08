@@ -5,6 +5,7 @@ import (
 	"canercetin/pkg/backend/pages"
 	"canercetin/pkg/sqlpkg"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"io"
@@ -94,7 +95,10 @@ func CrawlHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			})
 			return
 		}
-		req, err := http.NewRequest(http.MethodPost, pages.ScrapingPath, bytes.NewReader(jsonBodyBytes))
+		// send a request to pages.ScrapingPath
+		/* scrapingAPIEndpoint := "https://" + c.Request.Host + pages.ScrapingPath
+		fmt.Println(scrapingAPIEndpoint) */
+		req, err := http.NewRequest(http.MethodPost, pages.ScrapingURL, bytes.NewReader(jsonBodyBytes))
 		if err != nil {
 			loggingUtil.Errorw("Error while making a request to scraping link.", zap.Error(err),
 				"utility", "CrawlHandler",
@@ -103,6 +107,7 @@ func CrawlHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		req.Header.Set("Content-Type", "application/json")
 		resp, _ := http.DefaultClient.Do(req)
 		responseData, err := io.ReadAll(resp.Body)
+		fmt.Println(string(responseData))
 		if err != nil {
 			loggingUtil.Errorw("Error while reading response body.", zap.Error(err),
 				"utility", "CrawlHandler")
@@ -114,7 +119,7 @@ func CrawlHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status":   "success",
-			"response": responseData,
+			"response": string(responseData),
 		})
 	}
 }

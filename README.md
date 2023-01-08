@@ -17,11 +17,16 @@ localhost:7171 also carries an API router group. You need to send ``raw data`` f
 Users must grab a secret key from website's homepage to authenticate.
 ````go
 /v1/api/auth -> POST -> {"username":"admin","password":"admin","email":"cartcurt@gmail.com","secretkey":"topsecret"}
-Returns an AUTH key. Necessary for other API calls.
+on success, returns
+JSON -> {"status":"success","username":"admin","auth":"asdasdasd", "message":  "Successfully authenticated, please use the token for future requests."}
+on fail, returns
+JSON -> {"status":"fail","message":"Invalid secret key."}
 ````
-```go
-
-```
+Returns an AUTH key. Necessary for other API calls.
+````go
+/v1/api/crawl -> POST -> {"username":"admin","authkey":"asdasdasd","maxdepth":"2","mainlink":"https://www.google.com"}
+````
+Need to return something on crawl response. TODO.
 ## TODO
 No order. Do whatever is easiest. Start from logging tbh.
 
