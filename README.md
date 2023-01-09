@@ -29,13 +29,13 @@ Returns an AUTH key. Necessary for other API calls.
 API is broken. Dont know why. It was working minutes before interview and it is down now. Guess that is my luck.
 
 ## Security?  
--Cookie check for auth token.
+-Cookie check for auth token on whole sites (except signin and signup). Add a new endpoint to V1 router to use this security measure.
 
 -SQL Injection prevention by only using Query or Prep functions.
 
 -Secret Key for API.
 
--16-cost password hashing.
+-16-cost password hashing while storing the password in database.
 
 -Callback functions are private. Whenever you click a button or form in the website, it will go through a router that is running on loopback adapter, so only 127.0.0.1, server can handle the callbacks.
 
