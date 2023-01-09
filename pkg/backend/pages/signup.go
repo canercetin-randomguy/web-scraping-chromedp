@@ -30,6 +30,11 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			c.Status(http.StatusBadRequest)
 			return
 		}
+		auth := sqlpkg.RandStringBytesMaskImprSrcSB(60)
+		// nuke the auth token to the clients username.
+		dbConnection := sqlpkg.SqlConn{}
+		dbConnection.GetSQLConn("clients")
+		err = dbConnection.InsertAuthenticationToken(LoginJSON.Username, auth)
 		// Hash the password and salt it with 16 min cost, this can change. Then create a new user with the LoginJSON struct.
 		err = hashAndSalt([]byte(LoginJSON.Password), 16, LoginJSON)
 		if err != nil {
@@ -38,11 +43,13 @@ func SignupFormJSONBinding(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 				"status": "failed",
 				"error":  err.Error(),
 			})
+			return
 		} else {
 			// Send a response to the client that the user has been created.
 			c.JSON(http.StatusOK, gin.H{
 				"status": "success",
 			})
+			return
 		}
 	}
 }
