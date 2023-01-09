@@ -29,16 +29,16 @@ Returns an AUTH key. Necessary for other API calls.
 API is broken. Dont know why. It was working minutes before interview and it is down now. Guess that is my luck.
 
 ## Security?  
-Cookie check for auth token.
+-Cookie check for auth token.
 
-SQL Injection prevention by only using Query or Prep functions.
+-SQL Injection prevention by only using Query or Prep functions.
 
-Secret Key for API.
+-Secret Key for API.
 
-16-cost password hashing.
+-16-cost password hashing.
 
-Callback functions are private. Whenever you click a button or form in the website, it will go through a router that is running on loopback adapter, so only 127.0.0.1, server can handle the callbacks.
+-Callback functions are private. Whenever you click a button or form in the website, it will go through a router that is running on loopback adapter, so only 127.0.0.1, server can handle the callbacks.
 
-File paths in storage contains username's, such as https://52d4-194-27-73-85.eu.ngrok.io/v1/storage/canercetin/result_canercetin_20230109_1.csv has canercetin in the path for canercetin client. Only canercetin client can access it, cookie checks are used in the process.
+-File paths in storage contains username's, such as https://52d4-194-27-73-85.eu.ngrok.io/v1/storage/canercetin/result_canercetin_20230109_1.csv has canercetin in the path for canercetin client. Only canercetin client can access it, cookie checks are used in the process.
 
 
