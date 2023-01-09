@@ -85,7 +85,7 @@
               if (data["status"] === "success") {
                 window.location.href = signinURL;
               } else if (data["status"] === "failed") {
-                alert("Username or email already exists");
+                alert(data["error"]);
                 window.location.href = signupURL;
               }
             });
