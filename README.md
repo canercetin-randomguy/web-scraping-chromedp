@@ -42,3 +42,4 @@ API is broken. Dont know why. It was working minutes before interview and it is 
 -File paths in storage contains username's, such as https://52d4-194-27-73-85.eu.ngrok.io/v1/storage/canercetin/result_canercetin_20230109_1.csv has canercetin in the path for canercetin client. Only canercetin client can access it, cookie checks are used in the process.
 
 
+Oh also, we have a logger. Kek.
