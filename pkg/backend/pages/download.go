@@ -31,7 +31,8 @@ func DownloadPage(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		}
 		c.HTML(200, "download.html", gin.H{
 			// pass the testStruct to the template.
-			"teststruct": str,
+			"teststruct":     str,
+			"DeleteEndpoint": DeletePath,
 		})
 	}
 }

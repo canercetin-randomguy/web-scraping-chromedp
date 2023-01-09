@@ -4,14 +4,165 @@
     <meta charset="UTF-8">
     <title>Candan A.Ş</title>
 </head>
+<script>
+    function setCookie(c_name, value, exdays) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + exdays);
+        var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+        document.cookie = c_name + "=" + c_value;
+    }
+
+    function getCookie(c_name) {
+        var i, x, y, ARRcookies = document.cookie.split(";");
+        for (i = 0; i < ARRcookies.length; i++) {
+            x = ARRcookies[i].substr(0, ARRcookies[i].indexOf("="));
+            y = ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
+            x = x.replace(/^\s+|\s+$/g, "");
+            if (x == c_name) {
+                return unescape(y);
+            }
+        }
+    }
+
+    function cssSelected() {
+        var cssSelected = $('#myList')[0].value;
+        if (cssSelected !== "select") {
+            setCookie("selectedCSS", cssSelected, 3);
+        }
+    }
+    function exportToJSON() {
+        const postRequestURL = document.getElementById("callback").value;
+        const toDeleteURL = document.getElementById("todelete").value;
+        const dot = ".";
+        const finalizedURL = dot.concat(toDeleteURL);
+        console.log(finalizedURL);
+        const AuthKey = getCookie("authtoken");
+        const Username = getCookie("username");
+        console.log(postRequestURL);
+        fetch(postRequestURL, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            'body': JSON.stringify({"username":Username,"authkey": AuthKey,"filepath": finalizedURL})
+        }).then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data["status"] === "success") {
+                    alert(`File ${data["deleted"]} has successfully been deleted.`);
+                    location.reload()
+                } else {
+                    alert("We could not delete the file ${data[deleted]}. Please contact the administrator.");
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+</script>
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<style>
+    .parent {
+        border: 1px solid black;
+        margin: 1rem;
+        padding: 2rem 2rem;
+        text-align: center;
+    }
+    .child {
+        display: inline-block;
+        border: 1px solid red;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+    }
+    input[type='checkbox'] {
+        display: none;
+    }
+    .wrap-collabsible {
+        margin: 1.2rem 0;
+    }
+    .lbl-toggle {
+        display: block;
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 1rem;
+        color: #DDD;
+        background: #0069ff;
+        cursor: pointer;
+        border-radius: 7px;
+        transition: all 0.25s ease-out;
+    }
+    .lbl-toggle:hover {
+        color: #FFF;
+    }
+    .lbl-toggle::before {
+        content: ' ';
+        display: inline-block;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid currentColor;
+        vertical-align: middle;
+        margin-right: .7rem;
+        transform: translateY(-2px);
+        transition: transform .2s ease-out;
+    }
+    .toggle:checked+.lbl-toggle::before {
+        transform: rotate(90deg) translateX(-3px);
+    }
+    .collapsible-content {
+        max-height: 0px;
+        overflow: hidden;
+        transition: max-height .25s ease-in-out;
+    }
+    .toggle:checked + .lbl-toggle + .collapsible-content {
+        max-height: 350px;
+    }
+    .toggle:checked+.lbl-toggle {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    .collapsible-content .content-inner {
+        background: rgba(0, 105, 255, .2);
+        border-bottom: 1px solid rgba(0, 105, 255, .45);
+        border-bottom-left-radius: 7px;
+        border-bottom-right-radius: 7px;
+        padding: .5rem 1rem;
+    }
+    .collapsible-content p {
+        margin-bottom: 0;
+    }
+
+</style>
 <body>
-<a href="/v1/download" class="btn btn-primary">Cant see results? Slap me till you see it.</a>
-{{range .teststruct}}
-    <h4>{{.MainLink}}</h4>
-    <h5>{{.FileExtension}}<h5>
-    <!-- make a {{.Filepath}} button that redirects to it when clicked -->
-    <a href="{{.Filepath}}">Download</a>
-    {{.CreatedAt}}
+<iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+{{ $deleteendpoint := .DeleteEndpoint }}
+<h4>All times are displayed on GMT+2 timezone. Caner will do something later, I hope.</h4>
+<h3><a href="/v1/download" class="btn btn-primary">Cant see results? Slap me till you see it.</a></h3>
+{{range $key, $value := .teststruct}}
+<input id="collapsible" class="toggle" type="checkbox">
+<label for="collapsible" class="lbl-toggle">Show {{ $key }} Results</label>
+<div class="collapsible-content">
+    <div class="content-inner">
+        <p>
+            {{range $value.ClientFileStorage}}
+        <div class="wrap-collabsible">
+            <div class="parent">
+                <div class='card card-body'>File Extension: {{ .FileExtension }}</div>
+                <div class='card card-body'>Timestamp: {{ .CreatedAt }}</div>
+                <div class='card card-body'><a href="{{.Filepath}}">Download</a></div>
+                <form onclick="exportToJSON()" target="dummyframe" action="">
+                    <input type="hidden" id="callback" value="{{ $deleteendpoint }}">
+                    <input type="hidden" id="todelete" value="{{ .Filepath }}">
+                    <div class='card card-body'><button type="submit" class="child">Delete From Servers</button></div>
+                </form>
+            </div>
+        </div>{{end}}
+        </p>
+    </div>
+</div>
 {{end}}
 </body>
 </html>

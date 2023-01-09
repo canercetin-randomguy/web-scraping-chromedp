@@ -3,6 +3,7 @@ package api
 import (
 	"canercetin/pkg/sqlpkg"
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -17,6 +18,14 @@ func DeleteHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 		if err != nil {
 			loggingUtil.Errorw("Error binding JSON.", zap.Error(err),
 				"Utility", "DeleteHandler")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Error binding JSON.",
+			})
+		}
+		// check if there is dot in the beginning of the filename.
+		if !strings.HasPrefix(ToDeleteInfo.FilePath, ".") {
+			// add dot to the beginning of the filename.
+			ToDeleteInfo.FilePath = "." + ToDeleteInfo.FilePath
 		}
 		if err != nil {
 			loggingUtil.Errorw("Error getting sql connection.", zap.Error(err),
@@ -52,9 +61,13 @@ func DeleteHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			return
 		}
 		// this will be used to delete the file link from the database
-		err = dbConnection.DeleteFileLink(ToDeleteInfo.Username, ToDeleteInfo.FilePath)
+		databaseFilepath := strings.ReplaceAll(ToDeleteInfo.FilePath, "./results/staticfs", "/v1/storage/")
+		databaseFilepath = databaseFilepath[1:]
+		fmt.Println(databaseFilepath)
+		err = dbConnection.DeleteFileLink(ToDeleteInfo.Username, databaseFilepath)
 		if err != nil {
 			loggingUtil.Errorw("Error deleting file link.", zap.Error(err))
+			return
 		}
 		// this will be used to delete the file from the server
 		ToDeleteInfo.FilePath = strings.ReplaceAll(ToDeleteInfo.FilePath, "/v1/storage", "/results/staticfs")
@@ -63,5 +76,9 @@ func DeleteHandler(loggingUtil *zap.SugaredLogger) gin.HandlerFunc {
 			loggingUtil.Errorw("Error deleting file.", zap.Error(err),
 				"client", ToDeleteInfo.Username)
 		}
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "success",
+			"deleted": ToDeleteInfo.FilePath,
+		})
 	}
 }

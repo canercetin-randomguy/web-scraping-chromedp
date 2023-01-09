@@ -29,7 +29,6 @@ func NewLoggerWithFile(filepath string) (*zap.SugaredLogger, error) {
 	cfg.EncoderConfig.FunctionKey = "function"
 	cfg.OutputPaths = []string{
 		filepath,
-		"stderr", // for also writing to terminal
 	}
 	logger, err := cfg.Build()
 	if err != nil {

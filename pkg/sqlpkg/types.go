@@ -11,6 +11,9 @@ import (
 type SqlConn struct {
 	DB *sql.DB
 }
+type ClientFileInfoGlued struct {
+	ClientFileStorage []ClientFileInfo
+}
 type ClientFileInfo struct {
 	Username      string `json:"username"`
 	FileExtension string `json:"file_extension"`

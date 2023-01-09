@@ -3,6 +3,7 @@ package sqlpkg
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
+	"time"
 )
 
 func (conn *SqlConn) CreateNewUser(username string, password []byte, email string, created_at string) error {
@@ -143,21 +144,33 @@ func (conn *SqlConn) InsertFileLink(username string, link string, created_at str
 	}
 	return nil
 }
-func (conn *SqlConn) RetrieveFileLinks(username string) ([]ClientFileInfo, error) {
+func (conn *SqlConn) RetrieveFileLinks(username string) (map[string]ClientFileInfoGlued, error) {
 	rows, err := conn.DB.Query("SELECT username, file_extension, filepath, created_at,mainlink FROM clients.client_file_info WHERE username = ?", username)
 	if err != nil {
 		return nil, err
 	}
-	var files []ClientFileInfo
+	var fileStorage = make(map[string]ClientFileInfoGlued)
+	// if main link is same with previous one, glue the files together.
 	for rows.Next() {
 		var file ClientFileInfo
 		err = rows.Scan(&file.Username, &file.FileExtension, &file.Filepath, &file.CreatedAt, &file.MainLink)
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, file)
+		dateParsed, err := time.Parse("2006-01-02T15:04:05Z", file.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		file.CreatedAt = dateParsed.String()
+		if entry, ok := fileStorage[file.MainLink]; ok {
+			entry.ClientFileStorage = append(entry.ClientFileStorage, file)
+			fileStorage[file.MainLink] = entry
+		} else {
+			// create a new key in map
+			fileStorage[file.MainLink] = ClientFileInfoGlued{ClientFileStorage: []ClientFileInfo{file}}
+		}
 	}
-	return files, nil
+	return fileStorage, nil
 }
 func (conn *SqlConn) DeleteFileLink(username string, filepath string) error {
 	_, err := conn.DB.Query("DELETE FROM clients.client_file_info WHERE username = ? AND filepath = ?", username, filepath)

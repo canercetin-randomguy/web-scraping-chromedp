@@ -42,6 +42,7 @@ var HomePath = "/v1/home"
 var ScrapingPath = "/v1/home/scraping/callback"
 var FileStoragePath = "/v1/storage"
 var SecretKeyPath = "/v1/secretkey"
+var DeletePath = "/v1/api/delete"
 
 var SignupURL = SignupPath
 var SigninURL = SigninPath

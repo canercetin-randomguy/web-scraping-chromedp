@@ -49,14 +49,14 @@ func ConvertJSONToCSV(source, destination string, loggingUtil *zap.SugaredLogger
 	writer := csv.NewWriter(outputFile)
 	defer writer.Flush()
 
-	header := []string{"Link", "Broken Status"}
+	header := []string{"Link", "Broken Status", "Outside Domain", "Status Code"}
 	if err = writer.Write(header); err != nil {
 		return err
 	}
 
 	for _, r := range links {
 		var csvRow []string
-		csvRow = append(csvRow, r.Link, strconv.FormatBool(r.IsBroken))
+		csvRow = append(csvRow, r.Link, strconv.FormatBool(r.IsBroken), strconv.FormatBool(r.OutsideDomain), strconv.Itoa(r.StatusCode))
 		if err = writer.Write(csvRow); err != nil {
 			return err
 		}

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
 	"go.uber.org/zap"
+	"io"
 	"log"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -35,8 +37,9 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 	var ScrapedLinks = make(map[string]LinkStruct)
 	var temporaryLink = LinkStruct{
 		// Just dummy values, these will be changed and appended to ScrapedLinks.LinkStorage
-		Link:     "example.com",
-		IsBroken: false,
+		Link:          "example.com",
+		IsBroken:      false,
+		OutsideDomain: false,
 	}
 	// Create a new folder for the client for logging if it does not exist.
 	err := logger.CreateNewFolder(fmt.Sprintf("./logs/%s", username))
@@ -66,51 +69,67 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 		colly.MaxDepth(maxDepth))
 	// let us wander in all a[href] tags, I mean they are considered links, aren't they?
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		// Check if valid first.
-		if IsUrl(e.Attr("href")) {
+		if IsUrl(e.Request.AbsoluteURL(e.Attr("href"))) {
 			// Set a flag to false
 			exists := false
 			// Wander around in already collected links
 			for it := range ScrapedLinks {
 				// If the link is already in the slice, set the flag to true
-				if ScrapedLinks[it].Link == e.Attr("href") {
+				if ScrapedLinks[it].Link == e.Request.AbsoluteURL(e.Attr("href")) {
 					exists = true
 				}
 			}
 			// If the flag is still false, append the link to the slice
 			if exists == false {
-				temporaryLink.Link = e.Attr("href")
+				temporaryLink.Link = e.Request.AbsoluteURL(e.Attr("href"))
 				temporaryLink.IsBroken = false
-				ScrapedLinks[e.Attr("href")] = temporaryLink
-			}
-		} else {
-			// add https://absolutePath to the link if it is not valid
-			tempLink := fmt.Sprintf("https://%s%s", absoluteSiteLink, e.Attr("href"))
-			if IsUrl(tempLink) {
-				// Set a flag to false
-				exists := false
-				// Wander around in already collected links
-				for it := range ScrapedLinks {
-					// If the link is already in the slice, set the flag to true
-					if ScrapedLinks[it].Link == e.Attr("href") {
-						exists = true
-					}
-				}
-				// If the flag is still false, append the link to the slice
-				if exists == false {
-					temporaryLink.Link = e.Attr("href")
-					temporaryLink.IsBroken = false
-					ScrapedLinks[e.Attr("href")] = temporaryLink
-				}
-			} else {
-				// if it is still not valid, log it.
-				errorLogger.Error("Invalid link", zap.String("link", tempLink))
+				temporaryLink.StatusCode = 404
+				ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))] = temporaryLink
 			}
 		}
 		err = c.Visit(e.Request.AbsoluteURL(e.Attr("href")))
 		if err != nil {
 			if strings.Contains(err.Error(), "already visited") {
 				// do nothing
+			} else if strings.Contains(err.Error(), "Not Found") {
+				if entry, ok := ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))]; ok {
+					entry.IsBroken = true
+					entry.OutsideDomain = false
+					entry.StatusCode = e.Response.StatusCode
+					ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))] = entry
+				}
+			} else if strings.Contains(err.Error(), "Forbidden domain") {
+				if entry, ok := ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))]; ok {
+					if IsUrl(e.Request.AbsoluteURL(e.Attr("href"))) {
+						req, _ := http.NewRequest(http.MethodGet, e.Request.AbsoluteURL(e.Attr("href")), nil)
+						resp, err := http.DefaultClient.Do(req)
+						if err != nil {
+							log.Println(err)
+						}
+						respData, _ := io.ReadAll(resp.Body)
+						if string(respData) == "" {
+							entry.IsBroken = true
+							entry.OutsideDomain = true
+							entry.StatusCode = 404
+							ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))] = entry
+						} else if resp.StatusCode != 200 {
+							entry.IsBroken = true
+							entry.OutsideDomain = true
+							entry.StatusCode = resp.StatusCode
+							ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))] = entry
+						} else {
+							entry.IsBroken = false
+							entry.OutsideDomain = true
+							entry.StatusCode = resp.StatusCode
+							ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))] = entry
+						}
+					} else {
+						entry.IsBroken = true
+						entry.OutsideDomain = true
+						entry.StatusCode = 404
+						ScrapedLinks[e.Request.AbsoluteURL(e.Attr("href"))] = entry
+					}
+				}
 			} else {
 				errorLogger.Errorw("Something went wrong while visiting the link.", zap.Error(err),
 					"client", username,
@@ -118,11 +137,15 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 					"link", e.Attr("href"))
 			}
 		}
+
 	})
 	// Append the broken links to the brokenLinks slice
 	c.OnResponse(func(r *colly.Response) {
-		if r.StatusCode == 404 {
+		if r.StatusCode != 200 {
 			if entry, ok := ScrapedLinks[r.Request.URL.String()]; ok {
+				entry.IsBroken = true
+				entry.OutsideDomain = false
+				entry.StatusCode = r.StatusCode
 				ScrapedLinks[r.Request.URL.String()] = entry
 			}
 		}
@@ -143,7 +166,6 @@ func FindLinks(siteLink string, maxDepth int, username string, linkLimit int) (s
 			"error", err,
 			"client", username)
 	}
-	fmt.Println(string(linkResponse))
 	return string(linkResponse), fileNumber
 }
 
